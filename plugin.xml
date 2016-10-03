@@ -68,7 +68,7 @@
     <source-file src="src/ios/Drop-in/NBPopoverController.m" />
     <source-file src="src/ios/Drop-in/NBTableViewController.m" />
 
-    <resource-file src="src/ios/Main.storyboard" target=“./Main.storyboard“ />
+    <resource-file src="src/ios/Main.storyboard" target="./Main.storyboard" />
 
     <framework src="CoreBluetooth.framework" />
     <framework src="src/ios/Framework-dynamic/AirTurnInterface.framework" custom="true" />
