@@ -20,9 +20,11 @@
             <string>bluetooth-central</string>
         </array>
     </config-file>
+
     <config-file parent="NSAppleMusicUsageDescription" target="*-Info.plist">
         <string>Uses music to demonstrate the PED working in the background to play and pause</string>
     </config-file>
+
     <header-file src="src/ios/AirTurn.h" />
     <header-file src="src/ios/AirTurnUI/AirTurnUIConnectionController.h" />
     <header-file src="src/ios/AirTurnUI/AirTurnUIPeripheralController.h" />

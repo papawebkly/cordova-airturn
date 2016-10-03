@@ -1,4 +1,3 @@
-cordova.define("cordova-plugin-airturn.airturn", function(require, exports, module) {
 
 var exec = require('cordova/exec');
 var channel = require('cordova/channel');
@@ -74,4 +73,3 @@ module.exports = {
 
 };
 
-});
