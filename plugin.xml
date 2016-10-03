@@ -14,11 +14,7 @@
     <clobbers target="airturn" />
   </js-module>
   <platform name="ios">
-    <config-file parent="/*" target="config.xml">
-      <feature name="airturn">
-        <param name="ios-package" value="AirTurn" />
-      </feature>
-    </config-file>
+    
     <config-file parent="UIBackgroundModes" target="*-Info.plist">
         <array>
             <string>bluetooth-central</string>
@@ -72,11 +68,17 @@
     <source-file src="src/ios/Drop-in/NBPopoverController.m" />
     <source-file src="src/ios/Drop-in/NBTableViewController.m" />
 
-    <source-file src="src/ios/Framework-dynamic/AirTurnInterface.framework" />
-    <source-file src="src/ios/Main.storyboard" />
+    <source-file src="src/ios/Framework-dynamic/AirTurnInterface.framework" framework="true"/>
+    <header-file src="src/ios/Main.storyboard" />
 
     <framework src="CoreBluetooth.framework" />
-    <framework src="src/ios/Framework-dynamic/AirTurnInterface.framework" />
+    <framework src="AirTurnInterface.framework" />
+
+    <config-file parent="/*" target="config.xml">
+      <feature name="airturn">
+        <param name="ios-package" value="AirTurn" />
+      </feature>
+    </config-file>
 
   </platform>
 </plugin>
