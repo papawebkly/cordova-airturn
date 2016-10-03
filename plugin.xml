@@ -46,9 +46,9 @@
     <header-file src="src/ios/CocoaLumberjack/Classes/DDLog+LOGV.h" />
     <header-file src="src/ios/CocoaLumberjack/Classes/DDLogMacros.h" />
     <header-file src="src/ios/CocoaLumberjack/Classes/DDTTYLogger.h" />
-    <header-file src="src/ios/CocoaLumberjack/Extensions/DDContextFilterLogFormatter.h" />
-    <header-file src="src/ios/CocoaLumberjack/Extensions/DDDispatchQueueLogFormatter.h" />
-    <header-file src="src/ios/CocoaLumberjack/Extensions/DDMultiFormatter.h" />
+    <header-file src="src/ios/CocoaLumberjack/Classes/Extensions/DDContextFilterLogFormatter.h" />
+    <header-file src="src/ios/CocoaLumberjack/Classes/Extensions/DDDispatchQueueLogFormatter.h" />
+    <header-file src="src/ios/CocoaLumberjack/Classes/Extensions/DDMultiFormatter.h" />
     <header-file src="src/ios/Drop-in/NBPopoverController.h" />
     <header-file src="src/ios/Drop-in/NBTableViewController.h" />
     
@@ -66,9 +66,9 @@
     <source-file src="src/ios/CocoaLumberjack/Classes/DDFileLogger.m" />
     <source-file src="src/ios/CocoaLumberjack/Classes/DDLog.m" />
     <source-file src="src/ios/CocoaLumberjack/Classes/DDTTYLogger.m" />
-    <source-file src="src/ios/CocoaLumberjack/Extensions/DDContextFilterLogFormatter.m" />
-    <source-file src="src/ios/CocoaLumberjack/Extensions/DDDispatchQueueLogFormatter.m" />
-    <source-file src="src/ios/CocoaLumberjack/Extensions/DDMultiFormatter.m" />
+    <source-file src="src/ios/CocoaLumberjack/Classes/Extensions/DDContextFilterLogFormatter.m" />
+    <source-file src="src/ios/CocoaLumberjack/Classes/Extensions/DDDispatchQueueLogFormatter.m" />
+    <source-file src="src/ios/CocoaLumberjack/Classes/Extensions/DDMultiFormatter.m" />
     <source-file src="src/ios/Drop-in/NBPopoverController.m" />
     <source-file src="src/ios/Drop-in/NBTableViewController.m" />
     
