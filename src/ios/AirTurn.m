@@ -13,7 +13,6 @@
 #import "CocoaLumberjack.h"
 
 
-@import AirTurnInterface;
 #import "AirTurnUIConnectionController.h"
 
 
