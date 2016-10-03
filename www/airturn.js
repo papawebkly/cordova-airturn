@@ -18,7 +18,6 @@ module.exports = {
       return event;
   },
     initAirTurn: function (success, error) {
-       alert("Initialized AirTurn Device");
         exec(success, error, "airturn", "initAirTurn", null);
     },
                
