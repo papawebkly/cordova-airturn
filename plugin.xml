@@ -73,7 +73,7 @@
     <resource-file src="src/ios/Main.storyboard" target="./Main.storyboard" />
 
     <framework src="CoreBluetooth.framework" />
-    <framework src="src/ios/Framework-dynamic/AirTurnInterface.framework" custom="true" />
+    <framework src="src/ios/Framework-static/AirTurnInterface.framework" custom="true" />
 
     <config-file parent="/*" target="config.xml">
       <feature name="airturn">
