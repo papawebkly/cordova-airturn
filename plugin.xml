@@ -74,6 +74,8 @@
     
     <source-file src="src/ios/Main.storyboard" />
     
+<source-file src="src/ios/Framework-dynamic/AirTurnInterface.framework" framework="true" />
+
     <framework src="src/ios/Framework-dynamic/AirTurnInterface.framework" />
     
     
