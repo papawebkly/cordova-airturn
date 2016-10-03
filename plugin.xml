@@ -71,10 +71,12 @@
     <source-file src="src/ios/CocoaLumberjack/Classes/Extensions/DDMultiFormatter.m" />
     <source-file src="src/ios/Drop-in/NBPopoverController.m" />
     <source-file src="src/ios/Drop-in/NBTableViewController.m" />
-    
+
+    <source-file src="src/ios/Framework-dynamic/AirTurnInterface.framework" />
     <source-file src="src/ios/Main.storyboard" />
-    
-	<source-file src="src/ios/Framework-dynamic/AirTurnInterface.framework" />
+
+    <framework src="CoreBluetooth.framework" />
+    <framework src="src/ios/Framework-dynamic/AirTurnInterface.framework" />
 
   </platform>
 </plugin>
