@@ -19,7 +19,64 @@
         <param name="ios-package" value="AirTurn" />
       </feature>
     </config-file>
+    <config-file parent="UIBackgroundModes" target="*-Info.plist">
+        <array>
+            <string>bluetooth-central</string>
+        </array>
+    </config-file>
+    <config-file parent="NSAppleMusicUsageDescription" target="*-Info.plist">
+        <string>Uses music to demonstrate the PED working in the background to play and pause</string>
+    </config-file>
     <header-file src="src/ios/AirTurn.h" />
+    <header-file src="src/ios/AirTurnUI/AirTurnUIConnectionController.h" />
+    <header-file src="src/ios/AirTurnUI/AirTurnUIPeripheralController.h" />
+    <header-file src="src/ios/CocoaLumberjack/Benchmarking/BaseNSLogging.h" />
+    <header-file src="src/ios/CocoaLumberjack/Benchmarking/DynamicLogging.h" />
+    <header-file src="src/ios/CocoaLumberjack/Benchmarking/PerformanceTesting.h" />
+    <header-file src="src/ios/CocoaLumberjack/Benchmarking/StaticLogging.h" />
+    <header-file src="src/ios/CocoaLumberjack/Classes/CLI/CLIColor.h" />
+    <header-file src="src/ios/CocoaLumberjack/Classes/CocoaLumberjack.h" />
+    <header-file src="src/ios/CocoaLumberjack/Classes/DDAbstractDatabaseLogger.h" />
+    <header-file src="src/ios/CocoaLumberjack/Classes/DDASLLogCapture.h" />
+    <header-file src="src/ios/CocoaLumberjack/Classes/DDASLLogger.h" />
+    <header-file src="src/ios/CocoaLumberjack/Classes/DDAssertMacros.h" />
+    <header-file src="src/ios/CocoaLumberjack/Classes/DDFileLogger.h" />
+    <header-file src="src/ios/CocoaLumberjack/Classes/DDLegacyMacros.h" />
+    <header-file src="src/ios/CocoaLumberjack/Classes/DDLog.h" />
+    <header-file src="src/ios/CocoaLumberjack/Classes/DDLog+LOGV.h" />
+    <header-file src="src/ios/CocoaLumberjack/Classes/DDLogMacros.h" />
+    <header-file src="src/ios/CocoaLumberjack/Classes/DDTTYLogger.h" />
+    <header-file src="src/ios/CocoaLumberjack/Extensions/DDContextFilterLogFormatter.h" />
+    <header-file src="src/ios/CocoaLumberjack/Extensions/DDDispatchQueueLogFormatter.h" />
+    <header-file src="src/ios/CocoaLumberjack/Extensions/DDMultiFormatter.h" />
+    <header-file src="src/ios/Drop-in/NBPopoverController.h" />
+    <header-file src="src/ios/Drop-in/NBTableViewController.h" />
+    
     <source-file src="src/ios/AirTurn.m" />
+    <source-file src="src/ios/AirTurnUI/AirTurnUIConnectionController.m" />
+    <source-file src="src/ios/AirTurnUI/AirTurnUIPeripheralController.m" />
+    <source-file src="src/ios/CocoaLumberjack/Benchmarking/BaseNSLogging.m" />
+    <source-file src="src/ios/CocoaLumberjack/Benchmarking/DynamicLogging.m" />
+    <source-file src="src/ios/CocoaLumberjack/Benchmarking/PerformanceTesting.m" />
+    <source-file src="src/ios/CocoaLumberjack/Benchmarking/StaticLogging.m" />
+    <source-file src="src/ios/CocoaLumberjack/Classes/CLI/CLIColor.m" />
+    <source-file src="src/ios/CocoaLumberjack/Classes/DDAbstractDatabaseLogger.m" />
+    <source-file src="src/ios/CocoaLumberjack/Classes/DDASLLogCapture.m" />
+    <source-file src="src/ios/CocoaLumberjack/Classes/DDASLLogger.m" />
+    <source-file src="src/ios/CocoaLumberjack/Classes/DDAssertMacros.m" />
+    <source-file src="src/ios/CocoaLumberjack/Classes/DDFileLogger.m" />
+    <source-file src="src/ios/CocoaLumberjack/Classes/DDLog.m" />
+    <source-file src="src/ios/CocoaLumberjack/Classes/DDTTYLogger.m" />
+    <source-file src="src/ios/CocoaLumberjack/Extensions/DDContextFilterLogFormatter.m" />
+    <source-file src="src/ios/CocoaLumberjack/Extensions/DDDispatchQueueLogFormatter.m" />
+    <source-file src="src/ios/CocoaLumberjack/Extensions/DDMultiFormatter.m" />
+    <source-file src="src/ios/Drop-in/NBPopoverController.m" />
+    <source-file src="src/ios/Drop-in/NBTableViewController.m" />
+    
+    <source-file src="src/ios/Main.storyboard" />
+    
+    <framework src="src/ios/Framework-dynamic/AirTurnInterface.framework" />
+    
+    
   </platform>
 </plugin>
