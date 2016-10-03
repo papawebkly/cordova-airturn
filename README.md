@@ -90,32 +90,3 @@ onDeviceReady: function() {
 
 }
 ```
-
-### IOS
-
-```Objective-C
-    In Xcode
-    1) Add followings in Info.plist
-    - 'Required background modes'
-        'item 0' String 'App communicates using CoreBluetooth'
-    - 'AirTurnAutomaticKeyboardManagement' Boolean YES
-    - 'Privacy - Media Library Usage Description' String 'Uses music to demonstrate the PED working in the background to play and pause'
-    2) 
-    - Drag the appropriate `AirTurnInterface.framework` package into your project (check 'Copy Items' and make sure your App target is checked)
-    - Add the CoreBluetooth framework to your link list
-    - Select your project in the project navigator
-        Select the App target
-        Select the "Build Phases" tab
-        Expand "Link Binary With Libraries"
-        Click the plus icon
-        Add `CoreBluetooth.framework`
-        Click the plus at the top of "Build Phases" and click "New Copy Files Phase"
-        In the new copy files phase at the bottom, change 'Destination' to 'Frameworks', then click the plus and select AirTurnInterface.framework
-        Click the plus at the top of "Build Phases" and click "New Run Script Phase"
-        Paste:
-        <pre><code>script="${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/AirTurnInterface.framework/strip-frameworks.sh"
-        if [ -f "$script" ]; then
-        bash "$script"
-        fi</code></pre>
-
-```
