@@ -225,10 +225,10 @@ NSString * AirTurnUIShouldRestoreUserInfoKey = @"AirTurnUIRestoreState";
     
     self.navigationItem.title = @"AirTurn";
     
-    UIButton *infoButton = [UIButton buttonWithType:UIButtonTypeInfoLight];
+    /*UIButton *infoButton = [UIButton buttonWithType:UIButtonTypeInfoLight];
     [infoButton addTarget:self action:@selector(infoButtonAction:) forControlEvents:UIControlEventTouchUpInside];
     self.infoButton = [[UIBarButtonItem alloc] initWithCustomView:infoButton];
-    [self.navigationItem setRightBarButtonItem:self.infoButton animated:NO];
+    [self.navigationItem setRightBarButtonItem:self.infoButton animated:NO];*/
 
     self.doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStylePlain target:self action:@selector(doneButtonAction:)];
     [self.navigationItem setLeftBarButtonItem:self.doneButton animated:NO];
