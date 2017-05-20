@@ -6,7 +6,7 @@ module.exports = {
 
   _channels: {},
   createEvent: function(type, data) {
-      var event = document.createEvent('AirturnEvent');
+      var event = document.createEvent('Event');
       event.initEvent(type, false, false);
       if (data) {
           for (var i in data) {
