@@ -6,7 +6,7 @@ module.exports = {
 
   _channels: {},
   createEvent: function(type, data) {
-      var event = document.createEvent('Event');
+      var event = document.createEvent('AirturnEvent');
       event.initEvent(type, false, false);
       if (data) {
           for (var i in data) {
@@ -20,30 +20,30 @@ module.exports = {
     initAirTurn: function (success, error) {
         exec(success, error, "airturn", "initAirTurn", null);
     },
-               
+
     setting: function (success, error) {
         exec(success, error, "airturn", "setting", null);
     },
-               
+
    isConnected: function (success, error) {
    exec(success, error, "airturn", "isConnected", null);
    },
-               
+
     getInfo: function (success, error) {
         exec(success, error, "airturn", "getInfo", null);
     },
-               
+
     killApp: function (success, error) {
         exec(success, error, "airturn", "killApp", null);
     },
-               
+
     fireEvent: function (type, data) {
      var event = this.createEvent( type, data );
      if (event && (event.type in this._channels)) {
          this._channels[event.type].fire(event);
      }
     },
-               
+
     addAirTurnEventListener: function (eventname,f) {
      if (!(eventname in this._channels)) {
          var me = this;
@@ -58,7 +58,7 @@ module.exports = {
        this._channels[eventname].subscribe(f);
      }
     },
-               
+
     removeEventListener: function(eventname, f) {
      if (eventname in this._channels) {
         var me = this;
