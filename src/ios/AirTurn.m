@@ -1,9 +1,9 @@
 //
-//  BrotherPrinterPlugin.m
-//  BrotherPrinterPlugin
+//  Airturn.m
+//  Cordova Airturn Plugin
 //
-//  Created by Ye Star on 4/9/16.
-//
+//  Created by  mobilestart55555
+//  Modified Henk Kelder
 //
 
 #define AirTurnPlayPauseiPod (1 && !TARGET_IPHONE_SIMULATOR)
@@ -11,10 +11,7 @@
 #import <Cordova/CDVAvailability.h>
 #import "AirTurn.h"
 #import "CocoaLumberjack.h"
-
-
 #import "AirTurnUIConnectionController.h"
-
 
 #if AirTurnPlayPauseiPod
 @import MediaPlayer;
@@ -39,17 +36,17 @@ static inline void throwWithName( NSError *error, NSString* name )
 
 - (void)dealloc
 {
-    
+
     for ( id observer in self.observerMap) {
-        
+
         [[NSNotificationCenter defaultCenter] removeObserver:observer];
-        
+
     }
-    
+
     [_observerMap removeAllObjects];
-    
+
     _observerMap = nil;
-    
+
 }
 
 /*
@@ -62,13 +59,13 @@ static inline void throwWithName( NSError *error, NSString* name )
 - (void)onAppTerminate
 {
     for ( id observer in self.observerMap) {
-        
+
         [[NSNotificationCenter defaultCenter] removeObserver:observer];
-        
+
     }
-    
+
     [_observerMap removeAllObjects];
-    
+
     _observerMap = nil;
 }
 
@@ -77,7 +74,7 @@ static inline void throwWithName( NSError *error, NSString* name )
     if (!_observerMap) {
         _observerMap = [[NSMutableDictionary alloc] initWithCapacity:100];
     }
-    
+
     return _observerMap;
 }
 
@@ -86,29 +83,29 @@ static inline void throwWithName( NSError *error, NSString* name )
     if (!self.commandDelegate ) {
         return;
     }
-    
+
     if (eventName == nil || [eventName length] == 0) {
-        
+
         @throw [NSException exceptionWithName:NSInvalidArgumentException
                                        reason:@"eventName is null or empty"
                                      userInfo:nil];
-        
+
     }
-    
+
     NSString *jsonDataString = @"{}";
-    
+
     if( data  ) {
-        
+
         NSError *error;
         NSDictionary *tmpData = data;
         if([eventName isEqualToString:@"AirTurnConnectionStateNotification"])
         {
             //AirTurnPeripheral *p = [data objectForKey:@"AirTurnPeripheralKey"];
-            
+
             AirTurnPeripheral *p = data[AirTurnPeripheralKey];
             switch([data[AirTurnConnectionStateKey] intValue]) {
                 case AirTurnConnectionStateConnected:
-                    
+
                     [[NSUserDefaults standardUserDefaults] setObject:p.name forKey:@"PeripheralName"];
                     [[NSUserDefaults standardUserDefaults] setObject:p.identifier forKey:@"DeviceUniqueIdentifier"];
                     [[NSUserDefaults standardUserDefaults] setObject:p.firmwareVersion forKey:@"FirmwareVersion"];
@@ -127,27 +124,26 @@ static inline void throwWithName( NSError *error, NSString* name )
                         @"AirTurnPortNumberKey":[data objectForKey:@"AirTurnPortNumberKey"]
                         };
         }
-        
+
         NSData *jsonData = [NSJSONSerialization dataWithJSONObject:tmpData
                                                            options:(NSJSONWritingOptions)0
                                                              error:&error];
-        
+
         if (! jsonData) {
-            
+
             throwWithName(error, @"JSON Serialization exception");
             return;
-            
+
         }
-        
+
         jsonDataString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-        
+
     }
-    
+
     NSString *func = [NSString stringWithFormat:@"window.airturn.fireEvent('%@', %@);", eventName, jsonDataString];
-    
+
     [self.commandDelegate evalJs:func];
-    
-    
+
 }
 
 - (void)getInfo:(CDVInvokedUrlCommand*)command
@@ -156,7 +152,7 @@ static inline void throwWithName( NSError *error, NSString* name )
     NSString *identifier = [[NSUserDefaults standardUserDefaults] stringForKey:@"DeviceUniqueIdentifier"];
     NSString *firmwareVersion = [[NSUserDefaults standardUserDefaults] stringForKey:@"FirmwareVersion"];
     NSString *hardwareVersion =[[NSUserDefaults standardUserDefaults] stringForKey:@"HardwareVersion"];
-    
+
     if(name == nil)
     {
         name = @"Unknown";
@@ -173,7 +169,7 @@ static inline void throwWithName( NSError *error, NSString* name )
     {
         hardwareVersion = @"Unknown";
     }
-    
+
     NSDictionary *dic = @{
                           @"PeripheralName": name,
                           @"DeviceUniqueIdentifier": identifier,
@@ -182,7 +178,7 @@ static inline void throwWithName( NSError *error, NSString* name )
                           };
 
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dic];
-    
+
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
@@ -198,9 +194,9 @@ static inline void throwWithName( NSError *error, NSString* name )
     [DDLog addLogger:[DDTTYLogger sharedInstance]];
 
     [AirTurnManager sharedManager];
-    
+
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    
+
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
@@ -213,7 +209,7 @@ static inline void throwWithName( NSError *error, NSString* name )
         [vManager becomeFirstResponder];
         NSLog(@"AirTurn makeActive: calling becomeFirstResponder");
     }
-    
+
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
@@ -225,7 +221,7 @@ static inline void throwWithName( NSError *error, NSString* name )
     connected = [AirTurnManager sharedManager].isConnected;
 
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:connected];
-    
+
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
@@ -233,75 +229,75 @@ static inline void throwWithName( NSError *error, NSString* name )
 - (void)addEventListener:(CDVInvokedUrlCommand*)command
 {
     CDVPluginResult* pluginResult;
-    
+
     __block NSString* eventName = command.arguments[0];
-    
+
     if (eventName == nil || [eventName length] == 0) {
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"eventName is null or empty"];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
         return;
     }
-    
+
     id observer = self.observerMap[eventName];
-    
+
     if (!observer) {
         __typeof(self) __weak weakSelf = self;
-        
+
         observer = [[NSNotificationCenter defaultCenter] addObserverForName:eventName
                                                                      object:nil
                                                                       queue:[NSOperationQueue mainQueue]
                                                                  usingBlock:^(NSNotification *note) {
-             
+
              __typeof(self) __strong strongSelf = weakSelf;
-             
+
              [strongSelf fireEvent:eventName data:note.userInfo];
              }];
         [self.observerMap setObject:observer forKey:eventName];
     }
-    
+
     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    
+
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-    
+
 }
 
 - (void)removeEventListener:(CDVInvokedUrlCommand*)command
 {
-    
+
     CDVPluginResult* pluginResult;
-    
+
     __block NSString* eventName = command.arguments[0];
-    
+
     if (eventName == nil || [eventName length] == 0) {
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"eventName is null or empty"];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
         return;
     }
-    
+
     id observer = self.observerMap[ eventName ];
-    
+
     if (observer) {
-        
+
         [[NSNotificationCenter defaultCenter] removeObserver:observer
                                                         name:eventName
                                                       object:self];
     }
-    
+
     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    
+
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-    
+
 }
 
 # pragma mark - Popover Presentation Controller Delegate
 
 - (void)popoverPresentationControllerDidDismissPopover:(UIPopoverPresentationController *)popoverPresentationController {
-    
+
     // called when a Popover is dismissed
 }
 
 - (BOOL)popoverPresentationControllerShouldDismissPopover:(UIPopoverPresentationController *)popoverPresentationController {
-    
+
     // return YES if the Popover should be dismissed
     // return NO if the Popover should not be dismissed
     return YES;
@@ -326,7 +322,7 @@ static inline void throwWithName( NSError *error, NSString* name )
 }
 
 - (void)popoverPresentationController:(UIPopoverPresentationController *)popoverPresentationController willRepositionPopoverToRect:(inout CGRect *)rect inView:(inout UIView *__autoreleasing  _Nonnull *)view {
-    
+
     // called when the Popover changes position
 }
 
@@ -337,9 +333,9 @@ static inline void throwWithName( NSError *error, NSString* name )
     navSetting.modalPresentationStyle = UIModalPresentationPopover;
 //    AirTurnUIConnectionController *settingC = [[AirTurnUIConnectionController alloc] initWithNibName:@"AirTurnUIConnectionController" bundle:nil];
 //    settingC.modalPresentationStyle = UIModalPresentationPopover;
-    
+
     [self.viewController presentViewController:navSetting animated:YES completion:nil];
-    
+
     UIPopoverPresentationController *popController = [navSetting popoverPresentationController];
     popController.permittedArrowDirections = UIPopoverArrowDirectionUp;
     popController.sourceView = self.webView;

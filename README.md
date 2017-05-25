@@ -66,6 +66,9 @@ onDeviceReady: function() {
             document.getElementById("airturn").innerHTML = "Port Number: "+e.AirTurnPortNumberKey;
         });
 
+        // use this after a text or other field has taken focus and the Presses are no longer triggered
+        window.airturn.makeActive()
+
         window.airturn.isConnected(function( e ) {//AirTurnPedalPressNotification
             var connectionState = "";
             if(e)
