@@ -20,7 +20,7 @@ module.exports = {
     initAirTurn: function (success, error) {
         exec(success, error, "airturn", "initAirTurn", null);
     },
-    makeActive:: function(success, error) {
+    makeActive: function(success, error) {
         exec(success, error, "airturn", "makeActive", null);
     },
 
