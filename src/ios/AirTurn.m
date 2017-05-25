@@ -204,6 +204,21 @@ static inline void throwWithName( NSError *error, NSString* name )
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+- (void)makeActive:(CDVInvokedUrlCommand*)command
+{
+    AirTurnViewManager* vManager = [[AirTurnManager sharedManager] viewManager];
+    BOOL first = [vManager isFirstResponder];
+    if (!first)
+    {
+        [vManager becomeFirstResponder];
+        NSLog(@"AirTurn makeActive: calling becomeFirstResponder");
+    }
+    
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+
 - (void)isConnected:(CDVInvokedUrlCommand*)command
 {
     BOOL connected = FALSE;
