@@ -14,15 +14,9 @@
     <clobbers target="airturn" />
   </js-module>
   <platform name="ios">
-    
-    <config-file parent="UIBackgroundModes" target="*-Info.plist">
-        <array>
-            <string>bluetooth-central</string>
-        </array>
-    </config-file>
 
-    <config-file parent="NSAppleMusicUsageDescription" target="*-Info.plist">
-        <string>Uses music to demonstrate the PED working in the background to play and pause</string>
+    <config-file parent="NSBluetoothPeripheralUsageDescription" target="*-Info.plist">
+      <string>An app can use an airturn to controle page navigation</string>
     </config-file>
 
     <header-file src="src/ios/AirTurn.h" />
@@ -49,7 +43,7 @@
     <header-file src="src/ios/CocoaLumberjack/Classes/Extensions/DDMultiFormatter.h" />
     <header-file src="src/ios/Drop-in/NBPopoverController.h" />
     <header-file src="src/ios/Drop-in/NBTableViewController.h" />
-    
+
     <source-file src="src/ios/AirTurn.m" />
     <source-file src="src/ios/AirTurnUI/AirTurnUIConnectionController.m" />
     <source-file src="src/ios/AirTurnUI/AirTurnUIPeripheralController.m" />
