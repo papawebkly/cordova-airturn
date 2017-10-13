@@ -446,6 +446,9 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
     self.advancedSettingsController.deviceName = self.peripheral.name;
     self.advancedSettingsController.fastResponseEnabled = self.peripheral.connectionConfiguration == AirTurnPeripheralConnectionConfigurationLowLatency;
    
+    // prevent slider changed doing value changed repeatedly
+    _defaultValues = NO;
+    _deviceValues = NO;
     [self allSlidersChanged];
     [self valueChanged];
 }
@@ -460,6 +463,9 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
     self.advancedSettingsController.isOSKeyRepeat = AirTurnPeripheralDefaultOSKeyRepeatEnabled;
     self.advancedSettingsController.fastResponseEnabled = AirTurnPeripheralDefaultConnectionConfiguration == AirTurnPeripheralConnectionConfigurationLowLatency;
     
+    // prevent slider changed doing value changed repeatedly
+    _defaultValues = NO;
+    _deviceValues = NO;
     [self allSlidersChanged];
     [self valueChanged];
 }
@@ -675,7 +681,7 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
 
-    if(self.peripheral.state != AirTurnConnectionStateReady) { return 1; } // forget cell
+    if(self.peripheral.state != AirTurnConnectionStateReady || self.peripheral.deviceType == AirTurnDeviceTypevPED) { return 1; } // forget cell
     NSInteger ret = SECTION_BUTTONS + 1; // convert last section index to count
     if(![self showAdvanced]) {
         ret -= 1;
