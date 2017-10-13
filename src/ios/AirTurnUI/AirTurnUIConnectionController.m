@@ -86,20 +86,22 @@ static Class PeripheralClass;
 WKScriptMessageHandler
 >
 
+@property(nonatomic, assign) AirTurnCentralState previousCentralState;
+
 @property(nonatomic, assign) BOOL scanning;
 
-@property (nonatomic, strong) UITableViewCell *enableCell;
-@property (nonatomic, strong) UISwitch *enableSwitch;
+@property(nonatomic, strong) UITableViewCell *enableCell;
+@property(nonatomic, strong) UISwitch *enableSwitch;
 
-@property (nonatomic, strong) UITableViewCell *automaticKeyboardManagementCell;
-@property (nonatomic, strong) UISwitch *automaticKeyboardManagementSwitch;
+@property(nonatomic, strong) UITableViewCell *automaticKeyboardManagementCell;
+@property(nonatomic, strong) UISwitch *automaticKeyboardManagementSwitch;
 
-@property (nonatomic, strong) UITableViewCell *scanningCell;
+@property(nonatomic, strong) UITableViewCell *scanningCell;
 
-@property (nonatomic, strong) AirTurnPeripheral *requestedConnectPeripheral;
+@property(nonatomic, strong) AirTurnPeripheral *requestedConnectPeripheral;
 
-@property (nonatomic, strong) UITableViewHeaderFooterView *deviceHeaderView;
-@property (nonatomic, strong) UIActivityIndicatorView *deviceHeaderSpinner;
+@property(nonatomic, strong) UITableViewHeaderFooterView *deviceHeaderView;
+@property(nonatomic, strong) UIActivityIndicatorView *deviceHeaderSpinner;
 
 @property(nonatomic, strong) UILabel *KeyboardKeyInfoTableFooter;
 @property(nonatomic, strong) UITableViewHeaderFooterView *unsupportedFooterView;
@@ -310,6 +312,8 @@ WKScriptMessageHandler
         @throw([NSException exceptionWithName:@"AirTurnInvalidInit" reason:@"Please initialise the class setting Keyboard and/or AirDirect support true" userInfo:nil]);
     }
     
+    self.previousCentralState = [AirTurnCentral sharedCentral].state;
+    
     self.tableView.rowHeight = UITableViewAutomaticDimension;
     self.tableView.estimatedRowHeight = 44;
     self.tableView.sectionHeaderHeight = UITableViewAutomaticDimension;
@@ -390,7 +394,7 @@ WKScriptMessageHandler
         [self.modeSwitchInfoViewController.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[v]|" options:0 metrics:nil views:@{@"v":self.modeSwitchInfoWebView}]];
     }
     
-    self.discoveredDevices = [NSMutableArray arrayWithCapacity:1];
+    self.discoveredDevices = [AirTurnCentral sharedCentral].discoveredAirTurns.allObjects.mutableCopy;
     // setup device list header view
     UITableViewHeaderFooterView *v = [[UITableViewHeaderFooterView alloc] init];
     self.deviceHeaderView = v;
@@ -767,8 +771,16 @@ WKScriptMessageHandler
 - (void)stateChanged:(NSNotification *)n {
     AirTurnCentralState state = [AirTurnCentral sharedCentral].state;
     // check if enable cell not displayed and we are powered on
-    if(state != AirTurnCentralStatePoweredOff && !self.enableCell.window)
+    if(state != AirTurnCentralStatePoweredOff && !self.enableCell.window) {
         [self.tableView reloadData];
+    }
+    if(self.previousCentralState < AirTurnCentralStateDisabled && state >= AirTurnCentralStateDisabled) {
+        for(AirTurnPeripheral *p in [AirTurnCentral sharedCentral].discoveredAirTurns) {
+            if(![self.discoveredDevices containsObject:p]) {
+                [self.discoveredDevices addObject:p];
+            }
+        }
+    }
     switch(state) {
         case AirTurnCentralStateDisconnected:
         case AirTurnCentralStateConnected:
@@ -877,7 +889,7 @@ WKScriptMessageHandler
         AirTurnPeripheral *p = n.userInfo[AirTurnPeripheralKey];
         switch(p.state) {
             case AirTurnConnectionStateReady: {
-                if(self.checkForFirmwareUpdates) {
+                if(self.checkForFirmwareUpdates && p.deviceType != AirTurnDeviceTypevPED) {
                 
                     NSString * lastCheckedKey = [NSString stringWithFormat:@"%@.%@", LastFirmwareUpdateVersionUserDefaultKey, p.identifier];
                     NSString * lastChecked = [[NSUserDefaults standardUserDefaults] stringForKey:lastCheckedKey];

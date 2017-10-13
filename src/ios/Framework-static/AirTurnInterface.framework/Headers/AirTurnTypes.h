@@ -46,6 +46,11 @@ AIRTURN_EXTERN NSString * _Nonnull const AirTurnIDKey;
  */
 AIRTURN_EXTERN NSString * _Nonnull const AirTurnDeviceTypeKey;
 
+/**
+ The notification `userInfo` key indicating if the device is an AirDirect device or not. The value is an `NSNumber` object containing a boolean value, YES if an AirTurnDirect device.
+ */
+AIRTURN_EXTERN NSString * _Nonnull const AirTurnConnectionModeAirDirectKey;
+
 /// ---------------------------------
 /// @name Pedal State Notifications
 /// ---------------------------------
@@ -395,6 +400,10 @@ typedef NS_ENUM(NSInteger, AirTurnDeviceType) {
      AirTurn PED device type
      */
     AirTurnDeviceTypePED,
+    /**
+     AirTurn virtual PED device type
+     */
+    AirTurnDeviceTypevPED,
     /**
      AirTurn PED device type
      */

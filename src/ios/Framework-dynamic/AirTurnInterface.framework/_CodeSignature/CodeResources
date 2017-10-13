@@ -58,7 +58,7 @@
 		</data>
 		<key>Headers/AirTurnTypes.h</key>
 		<data>
-		RDGkqWMdlicRmXOIkQ5GwIMLunw=
+		smFBlpDGRgJQYB7c3hJghl2S2N8=
 		</data>
 		<key>Headers/AirTurnView.h</key>
 		<data>
@@ -74,7 +74,7 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		ie0MlDkSFJKoUxXaat7QirjOgNk=
+		aQ5D9EOAFETotjkBCSipIVSNY84=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -234,11 +234,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			RDGkqWMdlicRmXOIkQ5GwIMLunw=
+			smFBlpDGRgJQYB7c3hJghl2S2N8=
 			</data>
 			<key>hash2</key>
 			<data>
-			V8Xr06+qyJCYCaanb8Na3tC2J6t/pvyR0ap3wL4LbjA=
+			MypPl5zljRdpJPoqu71/T/0irb24V8CXBdWz/lGPveQ=
 			</data>
 		</dict>
 		<key>Headers/AirTurnView.h</key>
