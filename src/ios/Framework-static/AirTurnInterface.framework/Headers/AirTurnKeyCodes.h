@@ -8,108 +8,255 @@
 
 #import <Foundation/Foundation.h>
 
-/*!
- *  Constants defining AirTurn keyboard codes.  Commented out keys are not detected through AirTurnView
+/**
+ Constants defining AirTurn keyboard codes
  */
 typedef NS_ENUM(NSInteger, AirTurnKeyCode) {
+    /**
+     Unknown key code
+     */
     AirTurnKeyCodeUnknown = -1,
+    /**
+     'A' keyboard key
+     */
     AirTurnKeyCodeA = 0x04,
+    /**
+     'B' keyboard key
+     */
+    /**
+     'B' keyboard key
+     */
     AirTurnKeyCodeB = 0x05,
+    /**
+     'C' keyboard key
+     */
     AirTurnKeyCodeC = 0x06,
+    /**
+     'D' keyboard key
+     */
     AirTurnKeyCodeD = 0x07,
+    /**
+     'E' keyboard key
+     */
     AirTurnKeyCodeE = 0x08,
+    /**
+     'F' keyboard key
+     */
     AirTurnKeyCodeF = 0x09,
+    /**
+     'G' keyboard key
+     */
     AirTurnKeyCodeG = 0x0A,
+    /**
+     'H' keyboard key
+     */
     AirTurnKeyCodeH = 0x0B,
+    /**
+     'I' keyboard key
+     */
     AirTurnKeyCodeI = 0x0C,
+    /**
+     'J' keyboard key
+     */
     AirTurnKeyCodeJ = 0x0D,
+    /**
+     'K' keyboard key
+     */
     AirTurnKeyCodeK = 0x0E,
+    /**
+     'L' keyboard key
+     */
     AirTurnKeyCodeL = 0x0F,
+    /**
+     'M' keyboard key
+     */
     AirTurnKeyCodeM = 0x10,
+    /**
+     'N' keyboard key
+     */
     AirTurnKeyCodeN = 0x11,
+    /**
+     'O' keyboard key
+     */
     AirTurnKeyCodeO = 0x12,
+    /**
+     'P' keyboard key
+     */
     AirTurnKeyCodeP = 0x13,
+    /**
+     'Q' keyboard key
+     */
     AirTurnKeyCodeQ = 0x14,
+    /**
+     'R' keyboard key
+     */
     AirTurnKeyCodeR = 0x15,
+    /**
+     'S' keyboard key
+     */
     AirTurnKeyCodeS = 0x16,
+    /**
+     'T' keyboard key
+     */
     AirTurnKeyCodeT = 0x17,
+    /**
+     'U' keyboard key
+     */
     AirTurnKeyCodeU = 0x18,
+    /**
+     'V' keyboard key
+     */
     AirTurnKeyCodeV = 0x19,
+    /**
+     'W' keyboard key
+     */
     AirTurnKeyCodeW = 0x1A,
+    /**
+     'X' keyboard key
+     */
     AirTurnKeyCodeX = 0x1B,
+    /**
+     'Y' keyboard key
+     */
     AirTurnKeyCodeY = 0x1C,
+    /**
+     'Z' keyboard key
+     */
     AirTurnKeyCodeZ = 0x1D,
+    /**
+     '1' keyboard key
+     */
     AirTurnKeyCode1 = 0x1E,
+    /**
+     '2' keyboard key
+     */
     AirTurnKeyCode2 = 0x1F,
+    /**
+     '3' keyboard key
+     */
     AirTurnKeyCode3 = 0x20,
+    /**
+     '4' keyboard key
+     */
     AirTurnKeyCode4 = 0x21,
+    /**
+     '5' keyboard key
+     */
     AirTurnKeyCode5 = 0x22,
+    /**
+     '6' keyboard key
+     */
     AirTurnKeyCode6 = 0x23,
+    /**
+     '7' keyboard key
+     */
     AirTurnKeyCode7 = 0x24,
+    /**
+     '8' keyboard key
+     */
     AirTurnKeyCode8 = 0x25,
+    /**
+     '9' keyboard key
+     */
     AirTurnKeyCode9 = 0x26,
+    /**
+     '0' keyboard key
+     */
     AirTurnKeyCode0 = 0x27,
+    /**
+     'Backslash' keyboard key
+     */
     AirTurnKeyCodeBackslash = 0x31,
+    /**
+     'Comma' keyboard key
+     */
     AirTurnKeyCodeComma = 0x36,
+    /**
+     'Equal' keyboard key
+     */
     AirTurnKeyCodeEqual = 0x2E,
+    /**
+     'Grave' keyboard key
+     */
     AirTurnKeyCodeGrave = 0x35,
-//    AirTurnKeyCodeKeypad1 = 0x59,
-//    AirTurnKeyCodeKeypad2 = 0x5A,
-//    AirTurnKeyCodeKeypad3 = 0x5B,
-//    AirTurnKeyCodeKeypad4 = 0x5C,
-//    AirTurnKeyCodeKeypad5 = 0x5D,
-//    AirTurnKeyCodeKeypad6 = 0x5E,
-//    AirTurnKeyCodeKeypad7 = 0x5F,
-//    AirTurnKeyCodeKeypad8 = 0x60,
-//    AirTurnKeyCodeKeypad9 = 0x61,
-//    AirTurnKeyCodeKeypad0 = 0x62,
-//    AirTurnKeyCodeKeypadClear = 0x53,
-//    AirTurnKeyCodeKeypadDecimal = 0x63,
-//    AirTurnKeyCodeKeypadDivide = 0x54,
-//    AirTurnKeyCodeKeypadEnter = 0x58,
-//    AirTurnKeyCodeKeypadEquals = 0x67,
-//    AirTurnKeyCodeKeypadMinus = 0x56,
+    /**
+     'Keypad Multiply' keyboard key
+     */
     AirTurnKeyCodeKeypadMultiply = 0x55,
+    /**
+     'Keypad Plus' keyboard key
+     */
     AirTurnKeyCodeKeypadPlus = 0x57,
+    /**
+     'Left Bracket' keyboard key
+     */
     AirTurnKeyCodeLeftBracket = 0x2F,
+    /**
+     'Right Bracket' keyboard key
+     */
     AirTurnKeyCodeRightBracket = 0x30,
+    /**
+     'Minus' keyboard key
+     */
     AirTurnKeyCodeMinus = 0x2D,
+    /**
+     'Period' keyboard key
+     */
     AirTurnKeyCodePeriod = 0x37,
+    /**
+     'Quote' keyboard key
+     */
     AirTurnKeyCodeQuote = 0x34,
+    /**
+     'Semicolon' keyboard key
+     */
     AirTurnKeyCodeSemicolon = 0x33,
+    /**
+     'Slash' keyboard key
+     */
     AirTurnKeyCodeSlash = 0x38,
+    /**
+     'Forward Delete' keyboard key
+     */
     AirTurnKeyCodeForwardDelete = 0x4C,
+    /**
+     'Delete' keyboard key
+     */
     AirTurnKeyCodeDelete = 0x2A,
+    /**
+     'Up Arrow' keyboard key
+     */
     AirTurnKeyCodeUpArrow = 0x52,
+    /**
+     'Right Arrow' keyboard key
+     */
     AirTurnKeyCodeRightArrow = 0x4F,
+    /**
+     'Down Arrow' keyboard key
+     */
     AirTurnKeyCodeDownArrow = 0x51,
+    /**
+     'Left Arrow' keyboard key
+     */
     AirTurnKeyCodeLeftArrow = 0x50,
-//    AirTurnKeyCodeHome = 0x4A,
-//    AirTurnKeyCodeEnd = 0x4D,
-//    AirTurnKeyCodeEscape = 0x29,
-//    AirTurnKeyCodeF1 = 0x3A,
-//    AirTurnKeyCodeF2 = 0x3B,
-//    AirTurnKeyCodeF3 = 0x3C,
-//    AirTurnKeyCodeF4 = 0x3D,
-//    AirTurnKeyCodeF5 = 0x3E,
-//    AirTurnKeyCodeF6 = 0x3F,
-//    AirTurnKeyCodeF7 = 0x40,
-//    AirTurnKeyCodeF8 = 0x41,
-//    AirTurnKeyCodeF9 = 0x42,
-//    AirTurnKeyCodeF10 = 0x43,
-//    AirTurnKeyCodeF11 = 0x44,
-//    AirTurnKeyCodeF12 = 0x45,
-//    AirTurnKeyCodeF13 = 0x68,
-//    AirTurnKeyCodeF14 = 0x69,
-//    AirTurnKeyCodeF15 = 0x6A,
-//    AirTurnKeyCodeF16 = 0x6B,
-//    AirTurnKeyCodeF17 = 0x6C,
-//    AirTurnKeyCodeF18 = 0x6D,
-//    AirTurnKeyCodeF19 = 0x6E,
-//    AirTurnKeyCodeF20 = 0x6F,
+    /**
+     'Page Up' keyboard key
+     */
     AirTurnKeyCodePageUp = 0x4B,
+    /**
+     'Page Down' keyboard key
+     */
     AirTurnKeyCodePageDown = 0x4E,
+    /**
+     'Return' keyboard key
+     */
     AirTurnKeyCodeReturn = 0x28,
+    /**
+     'Space' keyboard key
+     */
     AirTurnKeyCodeSpace = 0x2C,
-    AirTurnKeyCodeTab = 0x2B
+    /**
+     'Tab' keyboard key
+     */
+    AirTurnKeyCodeTab = 0x2B,
 };
