@@ -104,7 +104,7 @@ static inline void throwWithName( NSError *error, NSString* name )
 
             AirTurnPeripheral *p = data[AirTurnPeripheralKey];
             switch([data[AirTurnConnectionStateKey] intValue]) {
-                case AirTurnConnectionStateConnected:
+                case AirTurnConnectionStateReady:
 
                     [[NSUserDefaults standardUserDefaults] setObject:p.name forKey:@"PeripheralName"];
                     [[NSUserDefaults standardUserDefaults] setObject:p.identifier forKey:@"DeviceUniqueIdentifier"];
