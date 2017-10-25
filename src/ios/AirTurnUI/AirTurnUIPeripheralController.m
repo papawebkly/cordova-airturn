@@ -874,6 +874,7 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
         switch([self codeSectionForRealSection:indexPath.section]) {
             case SECTION_FORGET: // forget
                 [[AirTurnCentral sharedCentral] forgetAirTurn:self.peripheral];
+                [self.internalDelegate periheralControllerDidForgetAirTurn:self];
                 if(self.navigationController.topViewController == self) {
                     [self.navigationController popViewControllerAnimated:YES];
                 }
@@ -955,15 +956,11 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
             case AirTurnCentralErrorUnexpectedUnresolvable:
                 errorMessage = AirTurnUILocalizedString(@"Unexpected error which can't be resolved", @"Unexpected unresolvable central error message");
                 break;
+            case AirTurnCentralErrorConnectingTimedOut:
+                errorMessage = AirTurnUILocalizedString(@"Timed out", @"Connecting timed out peripheral error message");
+                break;
             case AirTurnCentralErrorConnectionTimedOut:
-                if(context == AirTurnErrorContextConnecting) {
-                    errorMessage = [NSString stringWithFormat:AirTurnUILocalizedString(@"Failed to connect. If you previously paired your AirTurn with this %@ you will need to remove the pairing in iOS settings > Bluetooth > %@ (tap (i)) > Forget This Device, then toggle Bluetooth off and on, then try connecting again", @"Connecting timed out peripheral error message"), [UIDevice currentDevice].localizedModel, peripheral.name];
-                    tryAgain = NO;
-                    removePairing = YES;
-                    errorContext = nil;
-                } else {
-                    errorMessage = AirTurnUILocalizedString(@"Connection timed out", @"connection timed out central error message");
-                }
+                errorMessage = AirTurnUILocalizedString(@"Connection timed out", @"connection timed out central error message");
                 break;
             case AirTurnCentralErrorNotConnected:
                 errorMessage = AirTurnUILocalizedString(@"The device is not connected", @"Not connected central error message");
@@ -990,6 +987,7 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
             case AirTurnPeripheralErrorUnexpectedUnresolvable:
                 errorMessage = AirTurnUILocalizedString(@"Unexpected error which can't be resolved", @"Unexpected unresolvable peripheral error message");
                 break;
+            
             case AirTurnPeripheralErrorConnectionTimedOut:
                 errorMessage = AirTurnUILocalizedString(@"Connection timed out", @"Connection timed out peripheral error message");
                 break;

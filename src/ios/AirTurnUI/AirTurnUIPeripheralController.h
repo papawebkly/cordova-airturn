@@ -28,7 +28,11 @@ typedef NS_ENUM(NSUInteger, AirTurnErrorHandlingResult) {
 #define AirTurnUILocalizedString(key, comment) \
 [[NSBundle mainBundle] localizedStringForKey:(key) value:@"" table:@"AirTurnUI"]
 
+@protocol AirTurnUIPeripheralControllerInternalDelegate;
+
 @interface AirTurnUIPeripheralController : UITableViewController
+
+@property(nonatomic, weak, nullable) id<AirTurnUIPeripheralControllerInternalDelegate> internalDelegate;
 
 @property(nonatomic, readonly, nonnull) AirTurnPeripheral *peripheral;
 
@@ -47,5 +51,13 @@ typedef NS_ENUM(NSUInteger, AirTurnErrorHandlingResult) {
  @return The section as numbered in code
  */
 - (NSInteger)codeSectionForRealSection:(NSInteger)section;
+
+@end
+
+@protocol AirTurnUIPeripheralControllerInternalDelegate
+
+@required
+
+- (void)periheralControllerDidForgetAirTurn:(nonnull AirTurnUIPeripheralController *)peripheralController;
 
 @end
