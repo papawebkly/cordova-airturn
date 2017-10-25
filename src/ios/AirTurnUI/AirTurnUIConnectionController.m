@@ -11,6 +11,13 @@
 #import <AirTurnInterface/AirTurnKeyboardManager.h>
 #import <WebKit/WebKit.h>
 
+#define SECTION_ENABLE 0
+#define SECTION_DEVICES 1
+#define SECTION_SWITCH_MODE 2
+
+#define FIRST_SECTION SECTION_ENABLE
+#define LAST_SECTION SECTION_SWITCH_MODE
+
 static NSString * const EnabledUserDefaultKey = @"AirTurnEnabled";
 static NSString * const AutomaticKeyboardManagementUserDefaultKey = @"AirTurnAutomaticKeyboardManagement";
 static NSString * const InitialModeDefaultKey = @"AirTurnAirDirectMode";
@@ -83,6 +90,7 @@ static Class PeripheralClass;
 @end
 
 @interface AirTurnUIConnectionController () <
+AirTurnUIPeripheralControllerInternalDelegate,
 WKScriptMessageHandler
 >
 
@@ -486,7 +494,6 @@ WKScriptMessageHandler
     [nc addObserver:self selector:@selector(stateChanged:) name:AirTurnCentralStateChangedNotification object:nil];
     [nc addObserver:self selector:@selector(deviceDiscovered:) name:AirTurnDiscoveredNotification object:nil];
     [nc addObserver:self selector:@selector(deviceLost:) name:AirTurnLostNotification object:nil];
-    [nc addObserver:self selector:@selector(connectingToAirTurn:) name:AirTurnConnectingNotification object:nil];
     [nc addObserver:self selector:@selector(connectionStateChanged:) name:AirTurnConnectionStateChangedNotification object:nil];
     [nc addObserver:self selector:@selector(didDisconnect:) name:AirTurnDidDisconnectNotification object:nil];
     [nc addObserver:self selector:@selector(deviceUpdatedName:) name:AirTurnDidUpdateNameNotification object:nil];
@@ -603,7 +610,20 @@ WKScriptMessageHandler
 - (void)setScanning:(BOOL)scanning {
     if(!_AirDirectMode) return;
     [AirTurnCentral sharedCentral].scanning = scanning;
-    scanning && self.discoveredDevices.count > 0 ? [self.deviceHeaderSpinner startAnimating] : [self.deviceHeaderSpinner stopAnimating];
+    NSMutableSet *s = AirTurnCentral.sharedCentral.discoveredAirTurns.mutableCopy;
+    for(AirTurnPeripheral *p in _discoveredDevices.copy) {
+        if([s containsObject:p]) {
+            [s removeObject:p];
+        } else {
+            [_discoveredDevices removeObject:p];
+        }
+    }
+    [_discoveredDevices addObjectsFromArray:s.allObjects];
+    NSUInteger section = [self realSectionForCodeSection:SECTION_DEVICES];
+    if(self.tableView.numberOfSections > section) {
+        [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:section] withRowAnimation:UITableViewRowAnimationNone];
+        scanning && self.discoveredDevices.count > 0 ? [self.deviceHeaderSpinner startAnimating] : [self.deviceHeaderSpinner stopAnimating];
+    }
 }
 
 - (void)setAirDirectMode:(BOOL)AirDirectMode {
@@ -617,8 +637,8 @@ WKScriptMessageHandler
     }
     self.tableView.tableFooterView = _AirDirectMode ? nil : self.KeyboardKeyInfoTableFooter;
     [self.tableView reloadData];
-    if(self.tableView.numberOfSections >= 3 && _supportKeyboard && _supportAirDirect) {
-        [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:2] withRowAnimation:UITableViewRowAnimationNone];
+    if(self.tableView.numberOfSections > LAST_SECTION && _supportKeyboard && _supportAirDirect) {
+        [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:[self realSectionForCodeSection:SECTION_SWITCH_MODE]] withRowAnimation:UITableViewRowAnimationNone];
     }
     // make the change
     [self applyEnabled];
@@ -698,23 +718,42 @@ WKScriptMessageHandler
 - (void)presentAirTurnPeripheralControllerForPeripheral:(AirTurnPeripheral *)peripheral animated:(BOOL)animated {
     if(self.displayedPeripheralController || !peripheral) return;
     AirTurnUIPeripheralController *vc = [[PeripheralClass alloc] initWithPeripheral:peripheral];
+    vc.internalDelegate = self;
     if([self.delegate respondsToSelector:@selector(AirTurnUI:willDisplayPeripheral:)]) {
         [self.delegate AirTurnUI:self willDisplayPeripheral:vc];
     }
     [self.navigationController pushViewController:vc animated:animated];
 }
 
-- (void)presentAlert:(UIAlertController *)alertController {
+- (void)presentAlert:(UIAlertController *)alertController presentGlobally:(BOOL)presentGlobally {
     if(!alertController) { return; }
-    if([self.presentedViewController isKindOfClass:[UIAlertController class]]) {
-        [self.presentedViewController dismissViewControllerAnimated:YES completion:nil];
+    if(self.viewLoaded && self.view.window) {
+        if([self.presentedViewController isKindOfClass:[UIAlertController class]]) {
+            [self.presentedViewController dismissViewControllerAnimated:NO completion:^{
+                [self presentAlert:alertController presentGlobally:presentGlobally];
+            }];
+            return;
+        }
+        [self presentViewController:alertController animated:YES completion:nil];
+    } else if(presentGlobally) {
+        // display alert in a new window
+        UIWindow *alertWindow = [UIWindow new];
+        alertWindow.windowLevel = UIWindowLevelAlert;
+        alertWindow.backgroundColor = nil;
+        alertWindow.opaque = NO;
+        UIViewController *rvc = [[UIViewController alloc] init];
+        rvc.view.backgroundColor = nil;
+        rvc.view.opaque = NO;
+        alertWindow.rootViewController = rvc;
+        alertWindow.frame = [UIScreen mainScreen].bounds;
+        [alertWindow makeKeyAndVisible];
+        [alertWindow.rootViewController presentViewController:alertController animated:YES completion:nil];
     }
-    [self presentViewController:alertController animated:YES completion:nil];
 }
 
-- (void)presentAlert:(UIAlertController *)alertController fromPeripheral:(AirTurnPeripheral *)peripheral {
+- (void)presentAlert:(UIAlertController *)alertController presentGlobally:(BOOL)presentGlobally fromPeripheral:(AirTurnPeripheral *)peripheral {
     alertController.message = [NSString stringWithFormat:@"%@: %@", peripheral.name, alertController.message];
-    [self presentAlert:alertController];
+    [self presentAlert:alertController presentGlobally:presentGlobally];
 }
 
 - (AirTurnErrorHandlingResult)handleError:(nullable NSError *)error context:(AirTurnErrorContext)context peripheral:(AirTurnPeripheral *)peripheral {
@@ -827,18 +866,30 @@ WKScriptMessageHandler
 }
 
 - (void)_deviceDiscovered:(AirTurnPeripheral *)p {
-    NSUInteger index = [self insertAirTurn:p];
+    NSInteger section = [self realSectionForCodeSection:SECTION_DEVICES];
+    NSUInteger index = [self.discoveredDevices indexOfObject:p];
+    if(index != NSNotFound) { // already discovered, just reload table cell in case bonding state has changed
+        if(self.tableView.numberOfSections > section) {
+            [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:section]] withRowAnimation:UITableViewRowAnimationNone];
+        }
+        return;
+    }
+    index = [self insertAirTurn:p];
     if(index == NSNotFound) return;
     
     if(!self.shouldPerformAirDirectTableChange) return;
     
     [self.deviceHeaderSpinner startAnimating];
     
-    // if only 1 device, just reload searching row
-    if(self.discoveredDevices.count <= 1)
-        [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:[self realSectionForCodeSection:1]]] withRowAnimation:UITableViewRowAnimationNone];
-    else
-        [self.tableView insertRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:[self realSectionForCodeSection:1]]] withRowAnimation:UITableViewRowAnimationAutomatic];
+    
+    if(self.tableView.numberOfSections > section) {
+        // if only 1 device, just reload searching row
+        if(self.discoveredDevices.count <= 1) {
+            [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:section]] withRowAnimation:UITableViewRowAnimationNone];
+        } else {
+            [self.tableView insertRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:section]] withRowAnimation:UITableViewRowAnimationAutomatic];
+        }
+    }
 }
 
 - (void)deviceDiscovered:(NSNotification *)n {
@@ -849,9 +900,7 @@ WKScriptMessageHandler
 - (void)deviceChangeNotification:(NSNotification *)n {
     if(!self.shouldPerformAirDirectTableChange) return;
     AirTurnPeripheral *p = n.object;
-    NSUInteger index = [self.discoveredDevices indexOfObject:p];
-    if(index == NSNotFound) return;
-    [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:[self realSectionForCodeSection:1]]] withRowAnimation:UITableViewRowAnimationNone];
+    [self reloadRowForPeripheral:p];
 }
 
 - (void)deviceUpdatedName:(NSNotification *)n {
@@ -871,11 +920,14 @@ WKScriptMessageHandler
     if(index == NSNotFound) return;
     [self.discoveredDevices removeObject:p];
     if(!self.shouldPerformAirDirectTableChange) return;
-    if(self.discoveredDevices.count == 0) {
-        [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:[self realSectionForCodeSection:1]]] withRowAnimation:UITableViewRowAnimationNone];
-        [self.deviceHeaderSpinner stopAnimating];
-    } else {
-        [self.tableView deleteRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:[self realSectionForCodeSection:1]]] withRowAnimation:UITableViewRowAnimationAutomatic];
+    NSUInteger section = [self realSectionForCodeSection:SECTION_DEVICES];
+    if(self.tableView.numberOfSections > section) {
+        if(self.discoveredDevices.count == 0) {
+            [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:section]] withRowAnimation:UITableViewRowAnimationNone];
+            [self.deviceHeaderSpinner stopAnimating];
+        } else {
+            [self.tableView deleteRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:section]] withRowAnimation:UITableViewRowAnimationAutomatic];
+        }
     }
 }
 
@@ -907,18 +959,7 @@ WKScriptMessageHandler
                         [ac addAction:goToAppAction];
                         [ac setPreferredAction:goToAppAction];
                         
-                        // display alert in a new window
-                        UIWindow *alertWindow = [UIWindow new];
-                        alertWindow.windowLevel = UIWindowLevelAlert;
-                        alertWindow.backgroundColor = nil;
-                        alertWindow.opaque = NO;
-                        UIViewController *rvc = [[UIViewController alloc] init];
-                        rvc.view.backgroundColor = nil;
-                        rvc.view.opaque = NO;
-                        alertWindow.rootViewController = rvc;
-                        alertWindow.frame = [UIScreen mainScreen].bounds;
-                        [alertWindow makeKeyAndVisible];
-                        [alertWindow.rootViewController presentViewController:ac animated:YES completion:nil];
+                        [self presentAlert:ac presentGlobally:YES];
                         
                     }];                }
                 if(p == self.requestedConnectPeripheral) {
@@ -931,8 +972,21 @@ WKScriptMessageHandler
             } break;
             default: break;
         }
+        [self reloadRowForPeripheral:p];
     }
-    [self.tableView reloadData];
+}
+
+- (void)presentConnectionProblemAlertForPeripheral:(AirTurnPeripheral *)peripheral {
+    UIAlertController *ac = [UIAlertController alertControllerWithTitle:AirTurnUILocalizedString(@"Problem connecting", @"Problem connecting error title") message:[NSString stringWithFormat:AirTurnUILocalizedString(@"There was a problem connecting to %@. This usually happens if you reset your AirTurn to delete the pairing without resetting the pairing in iOS, or have just updated the firmware. To delete the pairing, go in to iOS settings > Bluetooth > %1$@ (tap (i)) > Forget This Device, toggle Bluetooth off and on, then try connecting again in this App by tapping the alert icon next to the AirTurn and then 'Reconnect'", @"Problem connecting error message"), peripheral.name] preferredStyle:UIAlertControllerStyleAlert];
+    [ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"Dismiss", @"Dismiss button title") style:UIAlertActionStyleCancel handler:nil]];
+    [ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"iOS Settings", @"iOS settings alert button") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [[UIApplication sharedApplication] openURL:(NSURL * _Nonnull)[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+    }]];
+    [ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"Reconnect", @"Button to initiate reconnection") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [[AirTurnCentral sharedCentral] connectToAirTurn:peripheral];
+        
+    }]];
+    [self presentAlert:ac presentGlobally:NO];
 }
 
 - (void)didDisconnect:(NSNotification *)n {
@@ -947,17 +1001,14 @@ WKScriptMessageHandler
             // pop off peripheral controller on disconnect
             [self.navigationController popToViewController:self animated:YES];
             if(displayedAlert) {
-                [self presentAlert:displayedAlert fromPeripheral:displayed.peripheral];
+                [self presentAlert:displayedAlert presentGlobally:NO fromPeripheral:displayed.peripheral];
             }
         }
-    }
-    [self.tableView reloadData];
-}
-
-- (void)connectingToAirTurn:(NSNotification *)n {
-    AirTurnPeripheral *p = n.userInfo[AirTurnPeripheralKey];
-    if([self.discoveredDevices containsObject:p]) {
-        [self.tableView reloadData];
+        if(p.lastConnectionFailed) {
+            [self presentConnectionProblemAlertForPeripheral:p];
+            // peripheral state change notification may occur before lastConnectionFailed is set, so reload row
+            [self reloadRowForPeripheral:p];
+        }
     }
 }
 
@@ -970,13 +1021,13 @@ WKScriptMessageHandler
         self.requestedConnectPeripheral = nil;
     }
     
-    NSUInteger r = [self.discoveredDevices indexOfObject:p];
-    if(r == NSNotFound) return;
-    [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:r inSection:[self realSectionForCodeSection:1]]] withRowAnimation:UITableViewRowAnimationNone];
+    [self reloadRowForPeripheral:p];
     
-    [[AirTurnCentral sharedCentral] cancelAirTurnConnection:p];
-    
-    [self handleError:error context:AirTurnErrorContextConnecting peripheral:p];
+    if(p.lastConnectionFailed) {
+        [self presentConnectionProblemAlertForPeripheral:p];
+    } else {
+        [self handleError:error context:AirTurnErrorContextConnecting peripheral:p];
+    }
 }
 
 - (void)updatePedalPressed {
@@ -1003,8 +1054,8 @@ WKScriptMessageHandler
     }
     UIAlertController *ac = [UIAlertController alertControllerWithTitle:AirTurnUILocalizedString(@"AirTurn", @"Product name") message:AirTurnUILocalizedString(@"Connection to the AirTurn timed out.  Please check the device is on and in range.  Otherwise please try forgetting the device from iOS Bluetooth settings", @"Connection timed out message") preferredStyle:UIAlertControllerStyleAlert];
     [ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"Dismiss", @"Dismiss button title") style:UIAlertActionStyleCancel handler:nil]];
-    [self presentAlert:ac];
-    [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:[self.discoveredDevices indexOfObject:p] inSection:[self realSectionForCodeSection:1]]] withRowAnimation:UITableViewRowAnimationNone];
+    [self presentAlert:ac presentGlobally:NO];
+    [self reloadRowForPeripheral:p];
 }
 
 - (void)airTurnAdded:(NSNotification *)notification {
@@ -1049,6 +1100,13 @@ WKScriptMessageHandler
         }
     }
     return section;
+}
+
+- (void)reloadRowForPeripheral:(AirTurnPeripheral *)peripheral {
+    NSUInteger r = [self.discoveredDevices indexOfObject:peripheral];
+    NSUInteger section = [self realSectionForCodeSection:SECTION_DEVICES];
+    if(r == NSNotFound || self.tableView.numberOfSections <= section) return;
+    [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:r inSection:section]] withRowAnimation:UITableViewRowAnimationNone];
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -1173,7 +1231,7 @@ WKScriptMessageHandler
         disclosureImageView = [[UIImageView alloc] initWithImage:disclosureImage];
     }
     switch([self codeSectionForRealSection:indexPath.section]) {
-        case 0: {// enable switch
+        case SECTION_ENABLE: {// enable switch
             BOOL poweredOn = self.isPoweredOn;
             BOOL supported = _supportAirDirect || _supportKeyboard;
             if(poweredOn && supported) {
@@ -1205,7 +1263,7 @@ WKScriptMessageHandler
             }
             return c;
         }
-        case 1: {// devices list
+        case SECTION_DEVICES: {// devices list
             if(!_AirDirectMode) {
                 return self.automaticKeyboardManagementCell;
             }
@@ -1272,6 +1330,25 @@ WKScriptMessageHandler
                         [(UIActivityIndicatorView *)c.accessoryView startAnimating];
                     }
                     break;
+                case AirTurnConnectionStateDisconnected: {
+                    NSMutableArray<UIView *> *views = [NSMutableArray arrayWithCapacity:2];
+                    if(p.lastConnectionFailed) {
+                        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+                        [button addTarget:self action:@selector(deviceConnectionProblemButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+                        [button setImage:[UIImage imageNamed:@"alert"] forState:UIControlStateNormal];
+                        button.tintColor = [UIColor redColor];
+                        [views addObject:button];
+                    }
+                    if(stored) {
+                        [views addObject:disclosureImageView];
+                    }
+                    if((views.count == 1 && views[0] == disclosureImageView) || views.count == 0) {
+                        c.accessoryView = nil; // fall back to accessory
+                    } else {
+                        [c setAccessoryViews:views];
+                    }
+                    c.textLabel.textColor = p.hasBonding ? [UIColor grayColor] : [UIColor blackColor];
+                } break;
                 default:
                     break;
             }
@@ -1281,7 +1358,7 @@ WKScriptMessageHandler
             [c layoutIfNeeded];
             return c;
         }
-        case 2: { // switch mode button
+        case SECTION_SWITCH_MODE: { // switch mode button
             UITableViewCell *c = nil;
             switch (indexPath.row) {
                 case 0:
@@ -1309,7 +1386,7 @@ WKScriptMessageHandler
 }
 
 
-#pragma mark - Table view delegate
+#pragma mark Table view delegate
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
@@ -1321,6 +1398,7 @@ WKScriptMessageHandler
                 case AirTurnConnectionStateReady:
                     [self presentAirTurnPeripheralControllerForPeripheral:p animated:YES];
                     break;
+                case AirTurnConnectionStateDisconnecting:
                 case AirTurnConnectionStateDisconnected:
                 case AirTurnConnectionStateSystemConnected: // might be system connected and not requested by user
                     if([[AirTurnCentral sharedCentral].storedAirTurns containsObject:p]) {
@@ -1328,19 +1406,19 @@ WKScriptMessageHandler
                     } else if(self.maxNumberOfAirDirectAirTurns > 0 && [AirTurnCentral sharedCentral].storedAirTurns.count == self.maxNumberOfAirDirectAirTurns) {
                         UIAlertController *ac = [UIAlertController alertControllerWithTitle:AirTurnUILocalizedString(@"Max number of AirTurns", @"AirTurn max number of AirTurns") message:[NSString stringWithFormat:AirTurnUILocalizedString(@"You can only connect %d AirTurn(s) at once. To connect to this AirTurn, forget another AirTurn first", @"AirTurn max number of AirTurns message"), self.maxNumberOfAirDirectAirTurns] preferredStyle:UIAlertControllerStyleAlert];
                         [ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"OK", @"OK button title") style:UIAlertActionStyleCancel handler:nil]];
-                        [self presentAlert:ac];
+                        [self presentAlert:ac presentGlobally:NO];
+                    } else if(p.hasBonding) {
+                        UIAlertController *ac = [UIAlertController alertControllerWithTitle:AirTurnUILocalizedString(@"Already bonded", @"AirTurn already bonded title") message:AirTurnUILocalizedString(@"This AirTurn is already paired to another device. Reset the AirTurn by holding power for 6s until it flashes to indicate it has reset, then try again", @"AirTurn already bonded message") preferredStyle:UIAlertControllerStyleAlert];
+                        [ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"OK", @"OK button title") style:UIAlertActionStyleCancel handler:nil]];
+                        [self presentAlert:ac presentGlobally:NO fromPeripheral:p];
                     } else if(!self.displayedPairingWarning) {
                         self.displayedPairingWarning = YES;
                         UIAlertController *ac = [UIAlertController alertControllerWithTitle:AirTurnUILocalizedString(@"Pairing Required", @"AirTurn pre-connect pairing warning title") message:AirTurnUILocalizedString(@"AirTurn requires pairing to operate.  If prompted, please tap \"Pair\"", @"AirTurn pre-connect pairing warning message") preferredStyle:UIAlertControllerStyleAlert];
                         [ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"OK", @"OK button title") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
                             self.requestedConnectPeripheral = p;
                             [[AirTurnCentral sharedCentral] connectToAirTurn:p];
-                            NSInteger row = [self.discoveredDevices indexOfObject:p];
-                            if(row != NSNotFound) {
-                                [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:row inSection:[self realSectionForCodeSection:1]]] withRowAnimation:UITableViewRowAnimationNone];
-                            }
                         }]];
-                        [self presentAlert:ac];
+                        [self presentAlert:ac presentGlobally:NO];
                     } else {
                         [[AirTurnCentral sharedCentral] connectToAirTurn:p];
                     }
@@ -1425,7 +1503,7 @@ WKScriptMessageHandler
     [[NSUserDefaults standardUserDefaults] setBool:sender.on forKey:AutomaticKeyboardManagementUserDefaultKey];
 }
 
-- (void)accessoryButtonTapped:(UIButton *)sender {
+- (void)deviceConnectionProblemButtonTapped:(UIButton *)sender {
     UIView *c = sender.superview;
     while(![c isKindOfClass:[UITableViewCell class]]) {
         c = c.superview;
@@ -1434,10 +1512,18 @@ WKScriptMessageHandler
         }
     }
     NSIndexPath *ip = [self.tableView indexPathForCell:(UITableViewCell *)c];
-    [self tableView:self.tableView accessoryButtonTappedForRowWithIndexPath:ip];
+    AirTurnPeripheral *p = self.discoveredDevices[ip.row];
+    [self presentConnectionProblemAlertForPeripheral:p];
 }
 
 - (void)dismiss:(id)sender {
     [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+#pragma mark - AirTurnUIPeripheralControllerInternalDelegate
+
+- (void)periheralControllerDidForgetAirTurn:(AirTurnUIPeripheralController *)peripheralController {
+    if(!peripheralController) { return; }
+    [self reloadRowForPeripheral:peripheralController.peripheral];
 }
 @end
