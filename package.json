@@ -1,16 +1,16 @@
 {
-  "name": "cordova-plugin-airturn”,
-  "version": “1.0.4”,
-  "description": “AirTurn Device Plugin“,
+  "name": "cordova-plugin-airturn",
+  "version": "1.0.4",
+  "description": "AirTurn Device Plugin",
   "cordova": {
-    "id": "cordova-plugin-airturn”,
+    "id": "cordova-plugin-airturn",
     "platforms": [
       "ios"
     ]
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mobilestar55555/cordova-airturn.git"
+    "url": "git+https://github.com/henkkelder/cordova-airturn.git"
   },
   "keywords": [
     "ecosystem:cordova",
@@ -22,10 +22,10 @@
       "version": ">=3.9.1"
     }
   ],
-  "author": “david and veliko - mobilestar55555”,
+  "author": "david and veliko - MobileStar4444, forked by henkkelder",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/mobilestar55555/cordova-airturn/issues"
+    "url": "https://github.com/henkkelder/cordova-airturn/issues"
   },
-  "homepage": "https://github.com/mobilestar55555/cordova-airturn#readme"
+  "homepage": "https://github.com/henkkelder/cordova-airturn#readme"
 }

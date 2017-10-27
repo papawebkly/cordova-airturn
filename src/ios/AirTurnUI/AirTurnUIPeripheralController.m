@@ -8,9 +8,9 @@
 
 #import "AirTurnUIPeripheralController.h"
 #import <AirTurnInterface/AirTurnCentral.h>
+#import <AirTurnInterface/AirTurnInterface.h>
 
 #define BlueCellColor [UIColor colorWithRed:0 green:122.0f/255.0f blue:1 alpha:1]
-#define TableCellPadding 16
 
 #define SECTION_FORGET 0
 #define SECTION_PROGRAMMING 1
@@ -22,7 +22,7 @@ typedef NS_OPTIONS(NSUInteger, AirTurnPeripheralWriteProgress) {
     AirTurnPeripheralWriteProgressRepeatRate = 1 << 1,
     AirTurnPeripheralWriteProgressIdlePowerOff = 1 << 2,
     AirTurnPeripheralWriteProgressConnectionConfiguration = 1 << 3,
-    AirTurnPeripheralWriteProgressDeviceName = 1 << 4
+    AirTurnPeripheralWriteProgressDeviceName = 1 << 4,
 };
 
 const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFeaturesAvailableOSKeyRepeatConfiguration | AirTurnPeripheralFeaturesAvailableConnectionSpeedConfiguration;
@@ -110,6 +110,10 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
     return NO;
 }
 
+- (BOOL)isVisible {
+    return [self isViewLoaded] && self.view.window;
+}
+
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     return _keyRepeatEnabled ? 3 : 2;
 }
@@ -159,11 +163,11 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
             }
             switch (indexPath.row) {
                 case 0:
-                    c.textLabel.text = NSLocalizedString(@"PED key repeat", @"PED key repeat setting cell");
+                    c.textLabel.text = AirTurnUILocalizedString(@"PED key repeat", @"PED key repeat setting cell");
                     c.accessoryType = _isOSKeyRepeat ? UITableViewCellAccessoryNone : UITableViewCellAccessoryCheckmark;
                     break;
                 case 1:
-                    c.textLabel.text = NSLocalizedString(@"OS key repeat", @"OS key repeat setting cell");
+                    c.textLabel.text = AirTurnUILocalizedString(@"OS key repeat", @"OS key repeat setting cell");
                     c.accessoryType = _isOSKeyRepeat ? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone;
                     break;
             }
@@ -175,14 +179,17 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
             }
             switch (indexPath.row) {
                 case 0:
-                    c.textLabel.text = NSLocalizedString(@"Low power mode", @"Low power setting cell");
+                    c.textLabel.text = AirTurnUILocalizedString(@"Low power mode", @"Low power setting cell");
                     c.accessoryType = _fastResponseEnabled ? UITableViewCellAccessoryNone : UITableViewCellAccessoryCheckmark;
                     break;
                 case 1:
-                    c.textLabel.text = NSLocalizedString(@"Fast response", @"Fast response setting cell");
+                    c.textLabel.text = AirTurnUILocalizedString(@"Fast response", @"Fast response setting cell");
                     c.accessoryType = _fastResponseEnabled ? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone;
                     break;
             }
+            break;
+        default:
+            c = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil];
             break;
     }
     return c;
@@ -254,9 +261,12 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
     if (self) {
         self.peripheral = peripheral;
         NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-        [nc addObserver:self selector:@selector(peripheralEncounteredError:) name:AirTurnEncounteredErrorNotification object:peripheral];
+        [nc addObserver:self selector:@selector(peripheralConnectionStateChanged:) name:AirTurnConnectionStateChangedNotification object:peripheral];
         [nc addObserver:self selector:@selector(peripheralWriteComplete:) name:AirTurnWriteCompleteNotification object:peripheral];
         [nc addObserver:self selector:@selector(peripheralDidUpdateName:) name:AirTurnDidUpdateNameNotification object:peripheral];
+        
+        self.tableView.rowHeight = UITableViewAutomaticDimension;
+        self.tableView.estimatedRowHeight = 44;
         
         self.navigationItem.title = peripheral.name;
         
@@ -373,6 +383,7 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
             [self.idlePowerOffCell.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-(insetTop)-[tl]->=0-[sl]-(insetBottom)-|" options:0 metrics:insets views:d]];
             [self.idlePowerOffCell.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(insetLeft)-[sl]-(insetRight)-|" options:0 metrics:insets views:d]];
         }
+        
         [self resetToDeviceValues];
     }
     return self;
@@ -397,10 +408,6 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
     [self.tableView addObserver:self forKeyPath:@"contentSize" options:NSKeyValueObservingOptionNew context:nil];
 }
 
-- (void)viewWillDisappear:(BOOL)animated {
-    [super viewWillDisappear:animated];
-}
-
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     if([keyPath isEqualToString:@"contentSize"]) {
         CGSize size = [self preferredContentSize];
@@ -411,25 +418,6 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
     [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
 }
 
-- (void)setPreferredContentSize:(CGSize)preferredContentSize {
-#if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_7_0
-    if([UIViewController instancesRespondToSelector:@selector(setPreferredContentSize:)])
-#endif
-    {
-        [super setPreferredContentSize:preferredContentSize];
-    }
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    self.contentSizeForViewInPopover = preferredContentSize;
-#pragma clang diagnostic pop
-}
-
-#if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_7_0
-- (CGSize)preferredContentSize {
-    return [UIViewController instancesRespondToSelector:@selector(preferredContentSize)] ? [super preferredContentSize] : self.contentSizeForViewInPopover;
-}
-#endif
-
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
@@ -437,7 +425,7 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
 }
 
 - (BOOL)showAdvanced {
-    return (self.peripheral.featuresAvailable & advancedFeatures) == advancedFeatures;
+    return [self.peripheral hasFeatures:advancedFeatures];
 }
 
 - (void)allSlidersChanged {
@@ -458,6 +446,9 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
     self.advancedSettingsController.deviceName = self.peripheral.name;
     self.advancedSettingsController.fastResponseEnabled = self.peripheral.connectionConfiguration == AirTurnPeripheralConnectionConfigurationLowLatency;
    
+    // prevent slider changed doing value changed repeatedly
+    _defaultValues = NO;
+    _deviceValues = NO;
     [self allSlidersChanged];
     [self valueChanged];
 }
@@ -471,6 +462,10 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
     self.advancedSettingsController.keyRepeatEnabled = AirTurnPeripheralDefaultKeyRepeatEnabled;
     self.advancedSettingsController.isOSKeyRepeat = AirTurnPeripheralDefaultOSKeyRepeatEnabled;
     self.advancedSettingsController.fastResponseEnabled = AirTurnPeripheralDefaultConnectionConfiguration == AirTurnPeripheralConnectionConfigurationLowLatency;
+    
+    // prevent slider changed doing value changed repeatedly
+    _defaultValues = NO;
+    _deviceValues = NO;
     [self allSlidersChanged];
     [self valueChanged];
 }
@@ -502,7 +497,10 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
 }
 
 - (BOOL)isDeviceValues {
-    return [self isKeyRepeatDeviceValue] && [self isIdlePowerOffDeviceValue] && (![self showAdvanced] || ([self isConnectionControlDeviceValue] && [self isDeviceNameDeviceValue]));
+    return
+        [self isKeyRepeatDeviceValue] &&
+        [self isIdlePowerOffDeviceValue] &&
+        (![self showAdvanced] || ([self isConnectionControlDeviceValue] && [self isDeviceNameDeviceValue]));
 }
 
 - (BOOL)isDefaultValues {
@@ -594,8 +592,18 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
     [self valueChanged];
 }
 
-- (BOOL)isUpdatingOrProgramming {
-    return self.isProgramming;
+- (BOOL)isActivityLocked {
+    return self.isProgramming;}
+
+- (BOOL)isVisible {
+    return [self isViewLoaded] && self.view.window;
+}
+
+- (UIAlertController *)displayedAlert {
+    if([self.presentedViewController isKindOfClass:[UIAlertController class]]) {
+        return (UIAlertController *)self.presentedViewController;
+    }
+    return nil;
 }
 
 #pragma mark Actions
@@ -656,25 +664,29 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
 
 #pragma mark - Table view data source
 
-- (NSUInteger)codeSectionForRealSection:(NSUInteger)section {
-    if(self.peripheral.connectionState == AirTurnConnectionStateConnected && ![self showAdvanced] && section >= SECTION_ADVANCED) {
-        return section + 1;
+- (NSInteger)codeSectionForRealSection:(NSInteger)section {
+    if(self.peripheral.state == AirTurnConnectionStateReady) {
+        NSUInteger ret = section;
+        if(![self showAdvanced] && section >= SECTION_ADVANCED) {
+            ret += 1;
+        }
+        return ret;
     }
     return section;
 }
 
-- (NSUInteger)realSectionForCodeSection:(NSUInteger)section {
+- (NSInteger)realSectionForCodeSection:(NSInteger)section {
     return section + section - [self codeSectionForRealSection:section];
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    if(self.peripheral.connectionState == AirTurnConnectionStateConnected) {
-        if([self showAdvanced]) {
-            return SECTION_BUTTONS + 1;
-        }
-        return SECTION_BUTTONS;
+
+    if(self.peripheral.state != AirTurnConnectionStateReady || self.peripheral.deviceType == AirTurnDeviceTypevPED) { return 1; } // forget cell
+    NSInteger ret = SECTION_BUTTONS + 1; // convert last section index to count
+    if(![self showAdvanced]) {
+        ret -= 1;
     }
-    return 1;
+    return ret;
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section {
@@ -688,16 +700,16 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
 }
 
 - (void)tableView:(UITableView *)tableView willDisplayFooterView:(UIView *)view forSection:(NSInteger)section {
-    if([view isKindOfClass:[UITableViewHeaderFooterView class]] && [self codeSectionForRealSection:section] == SECTION_BUTTONS){
+    if([view isKindOfClass:[UITableViewHeaderFooterView class]]) {
         UITableViewHeaderFooterView *tableViewHeaderFooterView = (UITableViewHeaderFooterView *) view;
-        tableViewHeaderFooterView.textLabel.textAlignment = NSTextAlignmentCenter;
+        tableViewHeaderFooterView.textLabel.textAlignment = [self codeSectionForRealSection:section] == SECTION_BUTTONS ? NSTextAlignmentCenter : NSTextAlignmentLeft;
     }
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
     switch ([self codeSectionForRealSection:section]) {
         case SECTION_FORGET:
-            return 30;
+            return 50;
         case SECTION_BUTTONS:
             return 50;
     }
@@ -729,7 +741,7 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
     return 0;
 }
 
-- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+- (CGFloat)tableView:(UITableView *)tableView estimatedHeightForRowAtIndexPath:(NSIndexPath *)indexPath {
     switch([self codeSectionForRealSection:indexPath.section]) {
         case SECTION_PROGRAMMING:
             if(indexPath.row > 0) {
@@ -737,7 +749,7 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
             }
             break;
     }
-    return self.tableView.rowHeight;
+    return 44;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -751,7 +763,7 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
                 c = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseID];
                 c.textLabel.text = AirTurnUILocalizedString(@"Forget AirTurn", nil);
             }
-            if([self isUpdatingOrProgramming]) {
+            if([self isActivityLocked]) {
                 c.textLabel.textColor = [UIColor grayColor];
                 c.selectionStyle = UITableViewCellSelectionStyleNone;
             } else {
@@ -760,7 +772,7 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
             }
             return c;
         case SECTION_PROGRAMMING: {
-            BOOL enabled = [self isUpdatingOrProgramming];
+            BOOL enabled = [self isActivityLocked];
             NSInteger computedRow = indexPath.row;
             if((!self.keyRepeatEnabled || self.advancedSettingsController.isOSKeyRepeat) && computedRow > 0) {
                 computedRow = 3;
@@ -797,7 +809,7 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
                 c.textLabel.text = AirTurnUILocalizedString(@"Advanced", @"Advanced table view cell");
                 c.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
             }
-            if([self isUpdatingOrProgramming]) {
+            if([self isActivityLocked]) {
                 c.textLabel.textColor = [UIColor grayColor];
                 c.selectionStyle = UITableViewCellSelectionStyleNone;
             } else {
@@ -840,27 +852,29 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
                     }
                     break;
             }
-            if((indexPath.row == 2 && [self isDefaultValues]) || (indexPath.row < 2 && _deviceValues) || [self isUpdatingOrProgramming]) {
+            if((indexPath.row == 2 && [self isDefaultValues]) || (indexPath.row < 2 && _deviceValues) || [self isActivityLocked]) {
                 c.selectionStyle = UITableViewCellSelectionStyleNone;
                 c.textLabel.textColor = [UIColor grayColor];
             } else {
                 c.selectionStyle = UITableViewCellSelectionStyleDefault;
                 c.textLabel.textColor = BlueCellColor;
             }
-            
-            return c;
+            break;
     }
-    
+    if(c == nil) {
+        c = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil];
+    }
     return c;
 }
 
 #pragma mark - Table view delegate
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    if(![self isUpdatingOrProgramming]) {
+    if(![self isActivityLocked]) {
         switch([self codeSectionForRealSection:indexPath.section]) {
             case SECTION_FORGET: // forget
                 [[AirTurnCentral sharedCentral] forgetAirTurn:self.peripheral];
+                [self.internalDelegate periheralControllerDidForgetAirTurn:self];
                 if(self.navigationController.topViewController == self) {
                     [self.navigationController popViewControllerAnimated:YES];
                 }
@@ -901,43 +915,206 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
 
 #pragma mark - Peripheral delegate
 
-- (void)peripheralEncounteredError:(NSNotification *)notification {
-    NSError *error = notification.userInfo[AirTurnErrorKey];
-    NSString *alertMessage = nil;
-           if([error.domain isEqualToString:AirTurnErrorDomain]) {
-        switch(error.code) {
-            case AirTurnErrorUnhandled:
-            case AirTurnErrorUnexpectedUnresolvable:
-            case AirTurnErrorUnresolvablePeripheralError:
-                alertMessage = AirTurnUILocalizedString(@"An unknown error occurred.  Please contact the developer if this continues.", @"Unknown error message");
++ (AirTurnErrorHandlingResult)handleError:(nullable NSError *)error context:(AirTurnErrorContext)context peripheral:(nullable AirTurnPeripheral *)peripheral alertController:(UIAlertController * _Nullable * _Nullable)alertController {
+    if(!error) {
+        return AirTurnErrorHandlingResultNoError;
+    }
+    AirTurnErrorHandlingResult result = AirTurnErrorHandlingResultNotHandled;
+    UIAlertController *ac = nil;
+    NSString *errorTitle = nil;
+    NSString *errorMessage = nil;
+    NSError *underlyingError = error.userInfo[NSUnderlyingErrorKey];
+    NSString *errorContext = nil;
+    BOOL tryAgain = YES;
+    BOOL contactSupport = YES;
+    BOOL toggleBluetooth = NO;
+    BOOL removePairing = NO;
+    switch (context) {
+        case AirTurnErrorContextNone:
+            break;
+        case AirTurnErrorContextConnecting:
+            errorContext = AirTurnUILocalizedString(@"connecting", @"Connecting context");
+            break;
+        case AirTurnErrorContextWritingDelayBeforeRepeat:
+            errorContext = AirTurnUILocalizedString(@"writing delay before repeat", @"Writing delay before repeat context");
+            break;
+        case AirTurnErrorContextWritingRepeatRate:
+            errorContext = AirTurnUILocalizedString(@"writing repeat rate", @"Writing repeat rate context");
+            break;
+        case AirTurnErrorContextWritingIdlePowerOff:
+            errorContext = AirTurnUILocalizedString(@"writing idle power off", @"Writing idle power off context");
+            break;
+        case AirTurnErrorContextWritingConnectionConfiguration:
+            errorContext = AirTurnUILocalizedString(@"writing connection configuration", @"Writing connection configuration context");
+            break;
+    }
+    if([error.domain isEqualToString:AirTurnCentralErrorDomain]) {
+        switch ((AirTurnCentralError)error.code) {
+            case AirTurnCentralErrorUnhandled:
+                errorMessage = AirTurnUILocalizedString(@"Unhandled error", @"Unhandled central error message");
                 break;
-            case AirTurnErrorConnectionTimedOut:
-                alertMessage = AirTurnUILocalizedString(@"The connection to the AirTurn timed out", @"Connection Timed Out error message");
+            case AirTurnCentralErrorUnexpectedUnresolvable:
+                errorMessage = AirTurnUILocalizedString(@"Unexpected error which can't be resolved", @"Unexpected unresolvable central error message");
                 break;
-            case AirTurnErrorPeripheralNotPaired:
-                alertMessage = AirTurnUILocalizedString(@"AirTurn requires pairing to connect.  Please tap \"Pair\" when requested", @"Pairing error message");
+            case AirTurnCentralErrorConnectingTimedOut:
+                errorMessage = AirTurnUILocalizedString(@"Timed out", @"Connecting timed out peripheral error message");
                 break;
-            case AirTurnErrorNotConnected:
-            case AirTurnErrorPeripheralDisconnected:
-                if(self.navigationController.topViewController == self) {
-                    [self.navigationController popViewControllerAnimated:YES];
-                }
-                return;
-            case AirTurnErrorOperationCancelled:
+            case AirTurnCentralErrorConnectionTimedOut:
+                errorMessage = AirTurnUILocalizedString(@"Connection timed out", @"connection timed out central error message");
                 break;
-            case AirTurnErrorAttributeWriteFailedTryLater:
-                alertMessage = self.isProgramming ? AirTurnUILocalizedString(@"Saving to AirTurn failed, please try again", @"Write failed error message") : AirTurnUILocalizedString(@"Updating AirTurn failed, please try again", @"Write failed error message");
-                _writeProgress = 0;
+            case AirTurnCentralErrorNotConnected:
+                errorMessage = AirTurnUILocalizedString(@"The device is not connected", @"Not connected central error message");
+                tryAgain = NO;
+                break;
+            case AirTurnCentralErrorNotReady:
+                errorMessage = AirTurnUILocalizedString(@"The device is not ready", @"Not ready central error message");
+                tryAgain = NO;
+                break;
+            case AirTurnCentralErrorPeripheralDisconnected:
+                errorMessage = AirTurnUILocalizedString(@"The device disconnected while performing the action", @"Disconnected central error message");
+                break;
+            case AirTurnCentralErrorPeripheralNotPaired:
+                errorMessage = AirTurnUILocalizedString(@"The device failed to pair. Try again, or forget the device in iOS Settings > Bluetooth", @"Not paired central error message");
+                tryAgain = NO;
                 break;
         }
-    } else {
-        // unhandled error
-        NSLog(@"Unhandled error: %@", error);
     }
-    
-    if(alertMessage)
-        [[[UIAlertView alloc] initWithTitle:AirTurnUILocalizedString(@"AirTurn Error", @"AirTurn Error alert title") message:alertMessage delegate:nil cancelButtonTitle:AirTurnUILocalizedString(@"Ok", nil) otherButtonTitles:nil] show];
-    [self.tableView reloadData];
+    else if([error.domain isEqualToString:AirTurnPeripheralErrorDomain]) {
+        switch ((AirTurnPeripheralError)error.code) {
+            case AirTurnPeripheralErrorUnhandled:
+                errorMessage = AirTurnUILocalizedString(@"Unhandled error", @"Unhandled peripheral error message");
+                break;
+            case AirTurnPeripheralErrorUnexpectedUnresolvable:
+                errorMessage = AirTurnUILocalizedString(@"Unexpected error which can't be resolved", @"Unexpected unresolvable peripheral error message");
+                break;
+            
+            case AirTurnPeripheralErrorConnectionTimedOut:
+                errorMessage = AirTurnUILocalizedString(@"Connection timed out", @"Connection timed out peripheral error message");
+                break;
+            case AirTurnPeripheralErrorNotConnected:
+                errorMessage = AirTurnUILocalizedString(@"The device is not connected", @"Not connected peripheral error message");
+                tryAgain = NO;
+                break;
+            case AirTurnPeripheralErrorNotReady:
+                errorMessage = AirTurnUILocalizedString(@"The device is not ready", @"Not ready central error message");
+                tryAgain = NO;
+                break;
+            case AirTurnPeripheralErrorPeripheralDisconnected:
+                errorMessage = AirTurnUILocalizedString(@"The device disconnected while performing the action", @"Disconnected peripheral error message");
+                break;
+            case AirTurnPeripheralErrorPeripheralNotPaired:
+                errorMessage = AirTurnUILocalizedString(@"The device failed to pair. Try again, or forget the device in iOS Settings > Bluetooth", @"Not paired peripheral error message");
+                tryAgain = NO;
+                break;
+            case AirTurnPeripheralErrorOperationCancelled:
+                errorMessage = AirTurnUILocalizedString(@"The operation was cancelled", @"Operation cancelled peripheral error message");
+                break;
+            case AirTurnPeripheralErrorAttributeWriteTooLarge:
+                errorMessage = AirTurnUILocalizedString(@"Internal error: attribute write too large", @"Write too large peripheral error message");
+                break;
+            case AirTurnPeripheralErrorAttributeWriteFailedTryLater:
+                errorMessage = AirTurnUILocalizedString(@"Internal error: write failed", @"Attribute write failed peripheral error message");
+                break;
+            case AirTurnPeripheralErrorMissingServices:
+                errorMessage = AirTurnUILocalizedString(@"Error while connecting to the device: Missing services", @"Missing services peripheral error message");
+                break;
+            case AirTurnPeripheralErrorATTErrorDiscoveringServices:
+                errorMessage = AirTurnUILocalizedString(@"Error while connecting to the device: Service discovery", @"Service discovery peripheral error message");
+                break;
+            case AirTurnPeripheralErrorMissingCharacteristics:
+                errorMessage = AirTurnUILocalizedString(@"Error while connecting to the device: Missing characteristics", @"Missing characteristics peripheral error message");
+                break;
+            case AirTurnPeripheralErrorATTErrorDiscoveringCharacteristics:
+                errorMessage = AirTurnUILocalizedString(@"Error while connecting to the device: Characteristic discovery", @"Characteristic discovery peripheral error message");
+                break;
+            case AirTurnPeripheralErrorInvalidData:
+                errorMessage = AirTurnUILocalizedString(@"Error while connecting to the device: Invalid data read", @"Invalid data peripheral error message");
+                tryAgain = NO;
+                toggleBluetooth = YES;
+                break;
+            case AirTurnPeripheralErrorIncompatibleModel:
+                errorTitle = AirTurnUILocalizedString(@"Model not supported!", @"Model not supported error title");
+                errorMessage = AirTurnUILocalizedString(@"The model of device connected is not supported by this App. Try updating the App and reconnecting", @"Model not supported error message");
+                tryAgain = NO;
+                contactSupport = NO;
+                result = AirTurnErrorHandlingResultModelNotSupported;
+                break;
+            case AirTurnPeripheralErrorDiscoveryTimedOut:
+                errorMessage = AirTurnUILocalizedString(@"Discovery timed out", @"Discovery timed out peripheral error message");
+                tryAgain = NO;
+                toggleBluetooth = YES;
+                break;
+        }
+    }
+    if(result == AirTurnErrorHandlingResultNotHandled) {
+        if(errorMessage) {
+            result = AirTurnErrorHandlingResultAlert;
+        } else {
+            errorTitle = AirTurnUILocalizedString(@"Unknown error!", @"Unknown error title");
+            errorMessage = [NSString stringWithFormat:AirTurnUILocalizedString(@"An unknown error occurred. If this keeps happening, try updating the App or contact support. (%@)", @"Unknown error message"), error.localizedDescription];
+            tryAgain = NO;
+            contactSupport = NO;
+        }
+    }
+    if(errorMessage && alertController) {
+        if(errorTitle == nil) {
+            errorTitle = AirTurnUILocalizedString(@"Error!", @"Default error title");
+        }
+        if(errorContext) {
+            errorMessage = [errorMessage stringByAppendingFormat:AirTurnUILocalizedString(@" when %@", @"Error message context format"), errorContext];
+        }
+        if(tryAgain) {
+            errorMessage = [errorMessage stringByAppendingString:AirTurnUILocalizedString(@". Try again", @"Try again error message suffix")];
+        } else if(toggleBluetooth) {
+            errorMessage = [errorMessage stringByAppendingString:@". Try toggling Bluetooth off and on, either from control centre (swipe up from the bottom of your screen) or iOS settings"];
+        }
+        if(contactSupport) {
+            errorMessage = [errorMessage stringByAppendingString:AirTurnUILocalizedString(@". If the problem continues to occur, contact AirTurn support", @"Contact support error message suffix")];
+        }
+        if(underlyingError) {
+            errorMessage = [errorMessage stringByAppendingFormat:AirTurnUILocalizedString(@" (Underlying error: %@", @"Underlying error message suffix"), underlyingError];
+        }
+        ac = [UIAlertController alertControllerWithTitle:errorTitle message:errorMessage preferredStyle:UIAlertControllerStyleAlert];
+        [ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"Dismiss", @"Error dismiss button") style:UIAlertActionStyleCancel handler:nil]];
+        if(removePairing) {
+            UIAlertAction *a = [UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"iOS Settings", @"iOS settings alert button") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                [[UIApplication sharedApplication] openURL:(NSURL * _Nonnull)[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+            }];
+            [ac addAction:a];
+            ac.preferredAction = a;
+        }
+        
+        *alertController = ac;
+    }
+    return result;
+}
+
+- (AirTurnErrorHandlingResult)handleError:(nullable NSError *)error context:(AirTurnErrorContext)context {
+    if(!error) {
+        return AirTurnErrorHandlingResultNoError;
+    }
+    UIAlertController *ac = nil;
+    AirTurnErrorHandlingResult result = [self.class handleError:error context:context peripheral:self.peripheral alertController:&ac];
+    if(ac) {
+        [self presentViewController:ac animated:YES completion:nil];
+    }
+    return result;
+}
+
+- (AirTurnErrorHandlingResult)handleError:(nullable NSError *)error {
+    return [self handleError:error context:AirTurnErrorContextNone];
+}
+
+- (void)peripheralConnectionStateChanged:(NSNotification *)notification {
+    switch (self.peripheral.state) {
+        case AirTurnConnectionStateReady:
+        case AirTurnConnectionStateDisconnecting:
+        case AirTurnConnectionStateDisconnected:
+            [self.tableView reloadData];
+            break;
+        default:
+            break;
+    }
 }
 
 - (void)markWriteProgressComplete:(AirTurnPeripheralWriteProgress)progress {
@@ -949,22 +1126,34 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
 
 - (void)peripheralWriteComplete:(NSNotification *)notification {
     AirTurnPeripheralWriteType type = [notification.userInfo[AirTurnWriteTypeKey] intValue];
+    NSError *error = notification.userInfo[AirTurnErrorKey];
+    AirTurnPeripheralWriteProgress progress = 0;
+    AirTurnErrorContext errorContext = 0;
     switch (type) {
         case AirTurnPeripheralWriteTypeDelayBeforeRepeat:
-            [self markWriteProgressComplete:AirTurnPeripheralWriteProgressDelayBeforeRepeat];
+            progress = AirTurnPeripheralWriteProgressDelayBeforeRepeat;
+            errorContext = AirTurnErrorContextWritingDelayBeforeRepeat;
             break;
         case AirTurnPeripheralWriteTypeRepeatRate:
-            [self markWriteProgressComplete:AirTurnPeripheralWriteProgressRepeatRate];
+            progress = AirTurnPeripheralWriteProgressRepeatRate;
+            errorContext = AirTurnErrorContextWritingRepeatRate;
             break;
         case AirTurnPeripheralWriteTypeIdlePowerOff:
-            [self markWriteProgressComplete:AirTurnPeripheralWriteProgressIdlePowerOff];
+            progress = AirTurnPeripheralWriteProgressIdlePowerOff;
+            errorContext = AirTurnErrorContextWritingIdlePowerOff;
             break;
         case AirTurnPeripheralWriteTypeConnectionConfiguration:
-            [self markWriteProgressComplete:AirTurnPeripheralWriteProgressConnectionConfiguration];
+            progress = AirTurnPeripheralWriteProgressConnectionConfiguration;
+            errorContext = AirTurnErrorContextWritingConnectionConfiguration;
             break;
         default:
             break;
     }
+    if(error) {
+        [self handleError:error context:errorContext];
+    }
+    [self markWriteProgressComplete:progress];
+    
 }
 
 - (void)peripheralDidUpdateName:(NSNotification *)n {

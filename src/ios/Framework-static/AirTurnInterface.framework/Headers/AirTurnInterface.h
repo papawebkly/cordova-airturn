@@ -1,11 +1,11 @@
-/*!
- *  @header
- *	@file AirTurnInterface.h
- *	@framework AirTurnInterface
- *
- *  @discussion AirTurn Interface framework
- *
- *	@copyright 2014 AirTurn, Inc. All rights reserved.
+/**
+ @header
+ 	@file AirTurnInterface.h
+ 	@framework AirTurnInterface
+ 
+ @discussion AirTurn Interface framework
+ 
+ @copyright 2014 AirTurn, Inc. All rights reserved.
  */
 
 #import <AirTurnInterface/AirTurnDefines.h>
