@@ -2,6 +2,7 @@ Cordova AirTurn
 =====================
 
 Cordova Plugin For AirTurn Device
+
 Oktober 2017: Upgraded to the Airturn framework 3.1.0 Beta2 
 
 IOS
