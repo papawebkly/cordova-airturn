@@ -915,7 +915,7 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
 
 #pragma mark - Peripheral delegate
 
-+ (AirTurnErrorHandlingResult)handleError:(nullable NSError *)error context:(AirTurnErrorContext)context peripheral:(nullable AirTurnPeripheral *)peripheral alertController:(UIAlertController * _Nullable * _Nullable)alertController {
++ (AirTurnErrorHandlingResult)handleError:(nullable NSError *)error context:(AirTurnErrorContext)context peripheral:(nullable AirTurnPeripheral *)peripheral alertController:(UIAlertController * _Nullable * _Nullable)alertController dismissHandler:(void (^ __nullable)(UIAlertAction *action))dismissHandler {
     if(!error) {
         return AirTurnErrorHandlingResultNoError;
     }
@@ -1075,10 +1075,13 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
             errorMessage = [errorMessage stringByAppendingFormat:AirTurnUILocalizedString(@" (Underlying error: %@", @"Underlying error message suffix"), underlyingError];
         }
         ac = [UIAlertController alertControllerWithTitle:errorTitle message:errorMessage preferredStyle:UIAlertControllerStyleAlert];
-        [ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"Dismiss", @"Error dismiss button") style:UIAlertActionStyleCancel handler:nil]];
+        [ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"Dismiss", @"Error dismiss button") style:UIAlertActionStyleCancel handler:dismissHandler]];
         if(removePairing) {
             UIAlertAction *a = [UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"iOS Settings", @"iOS settings alert button") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                 [[UIApplication sharedApplication] openURL:(NSURL * _Nonnull)[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+                if(dismissHandler) {
+                    dismissHandler(action);
+                }
             }];
             [ac addAction:a];
             ac.preferredAction = a;
@@ -1094,7 +1097,11 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
         return AirTurnErrorHandlingResultNoError;
     }
     UIAlertController *ac = nil;
-    AirTurnErrorHandlingResult result = [self.class handleError:error context:context peripheral:self.peripheral alertController:&ac];
+    AirTurnErrorHandlingResult result = [self.class handleError:error context:context peripheral:self.peripheral alertController:&ac dismissHandler:^(UIAlertAction *action) {
+        if(self.peripheral.state == AirTurnConnectionStateDisconnected && self.navigationController.topViewController == self) {
+            [self.navigationController popViewControllerAnimated:YES];
+        }
+    }];
     if(ac) {
         [self presentViewController:ac animated:YES completion:nil];
     }
