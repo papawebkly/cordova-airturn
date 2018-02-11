@@ -40,7 +40,7 @@ typedef NS_ENUM(NSUInteger, AirTurnErrorHandlingResult) {
 
 @property(nonatomic, readonly, nullable) UIAlertController *displayedAlert;
 
-+ (AirTurnErrorHandlingResult)handleError:(nullable NSError *)error context:(AirTurnErrorContext)context peripheral:(nullable AirTurnPeripheral *)peripheral alertController:(UIAlertController * _Nullable * _Nullable)alertController;
++ (AirTurnErrorHandlingResult)handleError:(nullable NSError *)error context:(AirTurnErrorContext)context peripheral:(nullable AirTurnPeripheral *)peripheral alertController:(UIAlertController * _Nullable * _Nullable)alertController dismissHandler:(void (^ __nullable)(UIAlertAction * _Nonnull action))dismissHandler;
 
 - (nonnull instancetype)initWithPeripheral:(nonnull AirTurnPeripheral *)peripheral;
 
