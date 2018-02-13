@@ -333,12 +333,12 @@ static inline void throwWithName( NSError *error, NSString* name )
     //navSetting.modalPresentationStyle = UIModalPresentationPopover;
 	navSetting.modalPresentationStyle = UIModalPresentationFullScreen;
 
-	if([navSetting.presentedViewController isKindOfClass:[UINavigationController class]]) {
+	//if([navSetting.presentedViewController isKindOfClass:[UINavigationController class]]) {
         // add a "Done" button to the parent navigation controller
         UIBarButtonItem *bbi = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Done", @"AirTurn UI dismiss button in nav controller") style:UIBarButtonItemStyleDone target:self action:@selector(dismiss)];
-        UINavigationController *nc = (UINavigationController *)navSetting.presentedViewController;
+        UINavigationController *nc = (UINavigationController *)navSetting; //.presentedViewController;
         nc.topViewController.navigationItem.leftBarButtonItem = bbi;
-    }
+    //}
 
 //    AirTurnUIConnectionController *settingC = [[AirTurnUIConnectionController alloc] initWithNibName:@"AirTurnUIConnectionController" bundle:nil];
 //    settingC.modalPresentationStyle = UIModalPresentationPopover;
