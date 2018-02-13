@@ -341,6 +341,11 @@ static inline void throwWithName( NSError *error, NSString* name )
     popController.sourceView = self.webView;
     popController.sourceRect = CGRectMake(200, 200, 250, 300);
     popController.delegate = self;
+
+	UIBarButtonItem *bbi = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Done", @"AirTurn UI dismiss button in nav controller") style:UIBarButtonItemStyleDone target:self action:@selector(dismiss)];
+    UINavigationController *nc = (UINavigationController *)navSetting.presentedViewController;
+    nc.topViewController.navigationItem.leftBarButtonItem = bbi;
+
 }
 
 
