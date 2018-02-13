@@ -331,8 +331,12 @@ static inline void throwWithName( NSError *error, NSString* name )
     UIStoryboard *mainStoryBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
     UINavigationController *navSetting = [mainStoryBoard instantiateViewControllerWithIdentifier:@"SettingNav"];
     navSetting.modalPresentationStyle = UIModalPresentationPopover;
-//    AirTurnUIConnectionController *settingC = [[AirTurnUIConnectionController alloc] initWithNibName:@"AirTurnUIConnectionController" bundle:nil];
-//    settingC.modalPresentationStyle = UIModalPresentationPopover;
+	//navSetting.modalPresentationStyle = UIModalPresentationFullScreen;
+
+    // add a "Done" button to the parent navigation controller
+    UIBarButtonItem *bbi = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Done", @"AirTurn UI dismiss button in nav controller") style:UIBarButtonItemStyleDone target:self action:@selector(dismiss)];
+    UINavigationController *nc = (UINavigationController *)navSetting; //.presentedViewController;
+    nc.topViewController.navigationItem.leftBarButtonItem = bbi;
 
     [self.viewController presentViewController:navSetting animated:YES completion:nil];
 
@@ -342,7 +346,6 @@ static inline void throwWithName( NSError *error, NSString* name )
     popController.sourceRect = CGRectMake(200, 200, 250, 300);
     popController.delegate = self;
 }
-
 
 - (void)killApp:(CDVInvokedUrlCommand*)command
 {

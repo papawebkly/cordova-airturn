@@ -725,16 +725,16 @@ WKScriptMessageHandler
     [self.navigationController pushViewController:vc animated:animated];
 }
 
-- (void)presentAlert:(UIAlertController *)alertController presentGlobally:(BOOL)presentGlobally {
+- (void)presentAlert:(UIAlertController *)alertController presentGlobally:(BOOL)presentGlobally animated:(BOOL)animated {
     if(!alertController) { return; }
     if(self.viewLoaded && self.view.window) {
         if([self.presentedViewController isKindOfClass:[UIAlertController class]]) {
             [self.presentedViewController dismissViewControllerAnimated:NO completion:^{
-                [self presentAlert:alertController presentGlobally:presentGlobally];
+                [self presentAlert:alertController presentGlobally:presentGlobally animated:NO];
             }];
             return;
         }
-        [self presentViewController:alertController animated:YES completion:nil];
+        [self presentViewController:alertController animated:animated completion:nil];
     } else if(presentGlobally) {
         // display alert in a new window
         UIWindow *alertWindow = [UIWindow new];
@@ -747,13 +747,13 @@ WKScriptMessageHandler
         alertWindow.rootViewController = rvc;
         alertWindow.frame = [UIScreen mainScreen].bounds;
         [alertWindow makeKeyAndVisible];
-        [alertWindow.rootViewController presentViewController:alertController animated:YES completion:nil];
+        [alertWindow.rootViewController presentViewController:alertController animated:animated completion:nil];
     }
 }
 
-- (void)presentAlert:(UIAlertController *)alertController presentGlobally:(BOOL)presentGlobally fromPeripheral:(AirTurnPeripheral *)peripheral {
+- (void)presentAlert:(UIAlertController *)alertController presentGlobally:(BOOL)presentGlobally animated:(BOOL)animated fromPeripheral:(AirTurnPeripheral *)peripheral {
     alertController.message = [NSString stringWithFormat:@"%@: %@", peripheral.name, alertController.message];
-    [self presentAlert:alertController presentGlobally:presentGlobally];
+    [self presentAlert:alertController presentGlobally:presentGlobally animated:animated];
 }
 
 - (AirTurnErrorHandlingResult)handleError:(nullable NSError *)error context:(AirTurnErrorContext)context peripheral:(AirTurnPeripheral *)peripheral {
@@ -761,7 +761,7 @@ WKScriptMessageHandler
         return AirTurnErrorHandlingResultNoError;
     }
     UIAlertController *ac = nil;
-    AirTurnErrorHandlingResult result = [AirTurnUIPeripheralController handleError:error context:context peripheral:peripheral alertController:&ac];
+    AirTurnErrorHandlingResult result = [AirTurnUIPeripheralController handleError:error context:context peripheral:peripheral alertController:&ac dismissHandler:nil];
     if(ac) {
         [self presentViewController:ac animated:YES completion:nil];
     }
@@ -959,7 +959,7 @@ WKScriptMessageHandler
                         [ac addAction:goToAppAction];
                         [ac setPreferredAction:goToAppAction];
                         
-                        [self presentAlert:ac presentGlobally:YES];
+                        [self presentAlert:ac presentGlobally:YES animated:YES];
                         
                     }];                }
                 if(p == self.requestedConnectPeripheral) {
@@ -986,7 +986,7 @@ WKScriptMessageHandler
         [[AirTurnCentral sharedCentral] connectToAirTurn:peripheral];
         
     }]];
-    [self presentAlert:ac presentGlobally:NO];
+    [self presentAlert:ac presentGlobally:NO animated:YES];
 }
 
 - (void)didDisconnect:(NSNotification *)n {
@@ -998,10 +998,9 @@ WKScriptMessageHandler
         AirTurnUIPeripheralController *displayed = self.displayedPeripheralController;
         if(displayed.peripheral == p) {
             UIAlertController *displayedAlert = displayed.displayedAlert;
-            // pop off peripheral controller on disconnect
-            [self.navigationController popToViewController:self animated:YES];
-            if(displayedAlert) {
-                [self presentAlert:displayedAlert presentGlobally:NO fromPeripheral:displayed.peripheral];
+            
+            if(!displayedAlert) { // if alert displayed, view controller is popped after alert dismiss
+                [self.navigationController popToViewController:self animated:YES];
             }
         }
         if(p.lastConnectionFailed) {
@@ -1054,7 +1053,7 @@ WKScriptMessageHandler
     }
     UIAlertController *ac = [UIAlertController alertControllerWithTitle:AirTurnUILocalizedString(@"AirTurn", @"Product name") message:AirTurnUILocalizedString(@"Connection to the AirTurn timed out.  Please check the device is on and in range.  Otherwise please try forgetting the device from iOS Bluetooth settings", @"Connection timed out message") preferredStyle:UIAlertControllerStyleAlert];
     [ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"Dismiss", @"Dismiss button title") style:UIAlertActionStyleCancel handler:nil]];
-    [self presentAlert:ac presentGlobally:NO];
+    [self presentAlert:ac presentGlobally:NO animated:YES];
     [self reloadRowForPeripheral:p];
 }
 
@@ -1406,11 +1405,11 @@ WKScriptMessageHandler
                     } else if(self.maxNumberOfAirDirectAirTurns > 0 && [AirTurnCentral sharedCentral].storedAirTurns.count == self.maxNumberOfAirDirectAirTurns) {
                         UIAlertController *ac = [UIAlertController alertControllerWithTitle:AirTurnUILocalizedString(@"Max number of AirTurns", @"AirTurn max number of AirTurns") message:[NSString stringWithFormat:AirTurnUILocalizedString(@"You can only connect %d AirTurn(s) at once. To connect to this AirTurn, forget another AirTurn first", @"AirTurn max number of AirTurns message"), self.maxNumberOfAirDirectAirTurns] preferredStyle:UIAlertControllerStyleAlert];
                         [ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"OK", @"OK button title") style:UIAlertActionStyleCancel handler:nil]];
-                        [self presentAlert:ac presentGlobally:NO];
+                        [self presentAlert:ac presentGlobally:NO animated:YES];
                     } else if(p.hasBonding) {
                         UIAlertController *ac = [UIAlertController alertControllerWithTitle:AirTurnUILocalizedString(@"Already bonded", @"AirTurn already bonded title") message:AirTurnUILocalizedString(@"This AirTurn is already paired to another device. Reset the AirTurn by holding power for 6s until it flashes to indicate it has reset, then try again", @"AirTurn already bonded message") preferredStyle:UIAlertControllerStyleAlert];
                         [ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"OK", @"OK button title") style:UIAlertActionStyleCancel handler:nil]];
-                        [self presentAlert:ac presentGlobally:NO fromPeripheral:p];
+                        [self presentAlert:ac presentGlobally:NO animated:YES fromPeripheral:p];
                     } else if(!self.displayedPairingWarning) {
                         self.displayedPairingWarning = YES;
                         UIAlertController *ac = [UIAlertController alertControllerWithTitle:AirTurnUILocalizedString(@"Pairing Required", @"AirTurn pre-connect pairing warning title") message:AirTurnUILocalizedString(@"AirTurn requires pairing to operate.  If prompted, please tap \"Pair\"", @"AirTurn pre-connect pairing warning message") preferredStyle:UIAlertControllerStyleAlert];
@@ -1418,7 +1417,7 @@ WKScriptMessageHandler
                             self.requestedConnectPeripheral = p;
                             [[AirTurnCentral sharedCentral] connectToAirTurn:p];
                         }]];
-                        [self presentAlert:ac presentGlobally:NO];
+                        [self presentAlert:ac presentGlobally:NO animated:YES];
                     } else {
                         [[AirTurnCentral sharedCentral] connectToAirTurn:p];
                     }

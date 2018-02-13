@@ -94,6 +94,13 @@
 /// ---------------------------------
 
 /**
+ The default `becomeFirstResponder` calls the delegate methods which will usually be set up to hide the keyboard automatically or something.  If you want to just become first responder with nothing else (ie the super method) call this.
+ 
+ @return `YES` if the responder became first responder
+ */
+- (BOOL)becomeFirstResponderNoDelegate;
+
+/**
  The default `resignFirstResponder` calls the delegate methods which will usually be set up to show the keyboard automatically or something.  If you want to just resign first responder with nothing else (ie the super method) call this.
  
  @return `YES` if the responder was resigned as first responder

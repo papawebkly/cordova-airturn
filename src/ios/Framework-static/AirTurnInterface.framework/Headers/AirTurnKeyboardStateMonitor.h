@@ -19,6 +19,10 @@ extern NSString *AirTurnKeyboardStateMonitorReadyNotification;
  */
 extern NSString *AirTurnKeyboardStateMonitorFirstResponderChangedNotification;
 
+/**
+ Indicates the first responder owner has changed
+ */
+extern NSString *AirTurnKeyboardStateMonitorFirstResponderOwnerChangedNotification;
 
 /**
  External keyboard connection status changed. Notifications do not occur if automatic keyboard management is disabled
@@ -59,6 +63,24 @@ typedef NS_ENUM(NSUInteger, AirTurnVirtualKeyboardNormalState){
 };
 
 /**
+ The first responder owner
+ */
+typedef NS_ENUM(NSUInteger, AirTurnFirstResponderOwner) {
+    /**
+     There is no first responder
+     */
+    AirTurnFirstResponderOwnerNone,
+    /**
+     The first responder is in this App
+     */
+    AirTurnFirstResponderOwnerLocal,
+    /**
+     The first responder is in another App in split screen
+     */
+    AirTurnFirstResponderOwnerRemote
+};
+
+/**
  Monitors the state of the virtual keyboard and first responders, and from this determines the state of the external keyboard
  */
 @interface AirTurnKeyboardStateMonitor : NSObject
@@ -74,6 +96,11 @@ typedef NS_ENUM(NSUInteger, AirTurnVirtualKeyboardNormalState){
 @property(nonatomic, readonly) AirTurnVirtualKeyboardNormalState normalVirtualKeyboardState;
 
 /**
+ Determines who owns the first responder – no first responder, local App or remote App (split screen)
+ */
+@property(nonatomic, readonly) AirTurnFirstResponderOwner firstResponderOwner;
+
+/**
  Determines if the virtual keyboard should be shown
  */
 @property(nonatomic, readonly) BOOL virtualKeyboardShouldBeShown;
@@ -82,6 +109,11 @@ typedef NS_ENUM(NSUInteger, AirTurnVirtualKeyboardNormalState){
  Determines if an external hardware keyboard (e.g. BT-105) is connected. Not valid if automatic keyboard management is disabled
  */
 @property(nonatomic, readonly) BOOL isExternalKeyboardConnected;
+
+/**
+ Determines if the keyboard state monitor is reassessing the external keyboard state. If so, you can add a block to be notified of completion using
+ */
+@property(nonatomic, readonly) BOOL isReassessingKeyboardState;
 
 /**
  Determines if the singleton has been initialised
@@ -103,5 +135,12 @@ typedef NS_ENUM(NSUInteger, AirTurnVirtualKeyboardNormalState){
  @param completion Completion block
  */
 - (void)reassessKeyboardState:(nonnull void (^)(void))completion;
+
+/**
+ Add a block to be called when the external keyboard state has been reassessed
+
+ @param completion Completion block
+ */
+- (void)addKeyboardStateReassessmentCompletionBlock:(nonnull void (^)(void))completion;
 
 @end
