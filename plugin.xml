@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <plugin id="cordova-plugin-airturn"
-        version="1.3.0"
+        version="1.4.0"
         xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android">
 
@@ -49,6 +49,7 @@
     <source-file src="src/ios/AirTurnUI/AirTurnUIAdvancedSettingsController.m" />
     <source-file src="src/ios/AirTurnUI/AirTurnUIConnectionController.m" />
     <source-file src="src/ios/AirTurnUI/AirTurnUIPeripheralController.m" />
+    
     <source-file src="src/ios/CocoaLumberjack/Benchmarking/BaseNSLogging.m" />
     <source-file src="src/ios/CocoaLumberjack/Benchmarking/DynamicLogging.m" />
     <source-file src="src/ios/CocoaLumberjack/Benchmarking/PerformanceTesting.m" />
@@ -67,6 +68,23 @@
     <source-file src="src/ios/Drop-in/NBTableViewController.m" />
 
     <resource-file src="src/ios/Main.storyboard" target="./Main.storyboard" />
+    <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/alert.imageset/alert.pdf" />
+    <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/alert.imageset/Contents.json" />
+
+    <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-changed.imageset/battery-charged.pdf" />
+    <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-changed.imageset/Contents.json" />
+
+    <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-changing.imageset/battery-charging.pdf" />
+    <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-changing.imageset/Contents.json" />
+
+    <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-fault.imageset/battery-fault.pdf" />
+    <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-fault.imageset/Contents.json" />
+
+    <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-low.imageset/battery-low.pdf" />
+    <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-low.imageset/Contents.json" />
+
+    <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-validating.imageset/battery-validating.pdf" />
+    <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-validating.imageset/Contents.json" />
 
     <framework src="CoreBluetooth.framework" />
     <framework src="src/ios/Framework-static/AirTurnInterface.framework" custom="true" />
