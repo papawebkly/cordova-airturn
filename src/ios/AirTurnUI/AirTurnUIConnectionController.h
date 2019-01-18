@@ -49,8 +49,8 @@
 /**
  Init method, use this instead of -init
  
- @param hid  Enable support for Keyboard AirTurns (BT-105, BT-106, DIGIT, DIGIT II, QUAD, STOMP6)
- @param btle Enable support for AirDirect AirTurns (PED, PEDpro, DIGIT III)
+ @param keyboard  Enable support for Keyboard AirTurns (BT-105, BT-106, DIGIT, DIGIT II, QUAD, STOMP6)
+ @param AirDirect Enable support for AirDirect AirTurns (PED, PEDpro, DIGIT III)
  
  @return UI controller object
  */

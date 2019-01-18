@@ -16,6 +16,8 @@ typedef NS_ENUM(NSUInteger, AirTurnErrorContext) {
     AirTurnErrorContextWritingRepeatRate,
     AirTurnErrorContextWritingIdlePowerOff,
     AirTurnErrorContextWritingConnectionConfiguration,
+	AirTurnErrorContextWritingPairingMethod,
+	AirTurnErrorContextWritingDebounceTime,
 };
 
 typedef NS_ENUM(NSUInteger, AirTurnErrorHandlingResult) {
@@ -25,8 +27,10 @@ typedef NS_ENUM(NSUInteger, AirTurnErrorHandlingResult) {
     AirTurnErrorHandlingResultModelNotSupported,
 };
 
+extern NSBundle * _Nonnull AirTurnUIBundle;
+
 #define AirTurnUILocalizedString(key, comment) \
-[[NSBundle mainBundle] localizedStringForKey:(key) value:@"" table:@"AirTurnUI"]
+[AirTurnUIBundle localizedStringForKey:(key) value:@"" table:@"AirTurnUI"]
 
 @protocol AirTurnUIPeripheralControllerInternalDelegate;
 
@@ -42,6 +46,7 @@ typedef NS_ENUM(NSUInteger, AirTurnErrorHandlingResult) {
 
 + (AirTurnErrorHandlingResult)handleError:(nullable NSError *)error context:(AirTurnErrorContext)context peripheral:(nullable AirTurnPeripheral *)peripheral alertController:(UIAlertController * _Nullable * _Nullable)alertController dismissHandler:(void (^ __nullable)(UIAlertAction * _Nonnull action))dismissHandler;
 
+
 - (nonnull instancetype)initWithPeripheral:(nonnull AirTurnPeripheral *)peripheral;
 
 /**
@@ -51,6 +56,7 @@ typedef NS_ENUM(NSUInteger, AirTurnErrorHandlingResult) {
  @return The section as numbered in code
  */
 - (NSInteger)codeSectionForRealSection:(NSInteger)section;
+- (NSInteger)realSectionForCodeSection:(NSInteger)section;
 
 @end
 
@@ -59,5 +65,6 @@ typedef NS_ENUM(NSUInteger, AirTurnErrorHandlingResult) {
 @required
 
 - (void)periheralControllerDidForgetAirTurn:(nonnull AirTurnUIPeripheralController *)peripheralController;
+
 
 @end
