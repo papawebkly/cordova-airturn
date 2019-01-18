@@ -20,8 +20,9 @@
     </config-file>
 
     <header-file src="src/ios/AirTurn.h" />
-    <header-file src="src/ios/AirTurnUI/AirTurnUIConnectionController.h" />
+    <header-file src="src/ios/AirTurnUI/AirTurnUIAdvancedSettingsController.h" />
     <header-file src="src/ios/AirTurnUI/AirTurnUIPeripheralController.h" />
+    <header-file src="src/ios/AirTurnUI/AirTurnUIConnectionController.h" />
     <header-file src="src/ios/CocoaLumberjack/Benchmarking/BaseNSLogging.h" />
     <header-file src="src/ios/CocoaLumberjack/Benchmarking/DynamicLogging.h" />
     <header-file src="src/ios/CocoaLumberjack/Benchmarking/PerformanceTesting.h" />
@@ -45,6 +46,7 @@
     <header-file src="src/ios/Drop-in/NBTableViewController.h" />
 
     <source-file src="src/ios/AirTurn.m" />
+    <source-file src="src/ios/AirTurnUI/AirTurnUIAdvancedSettingsController.m" />
     <source-file src="src/ios/AirTurnUI/AirTurnUIConnectionController.m" />
     <source-file src="src/ios/AirTurnUI/AirTurnUIPeripheralController.m" />
     <source-file src="src/ios/CocoaLumberjack/Benchmarking/BaseNSLogging.m" />
