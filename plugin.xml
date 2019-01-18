@@ -68,7 +68,7 @@
     <source-file src="src/ios/Drop-in/NBPopoverController.m" />
     <source-file src="src/ios/Drop-in/NBTableViewController.m" />
 
-    <source-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/Contents.json" />
+    <!--<source-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/Contents.json" />
     <source-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/alert.imageset/alert.pdf" />
     <source-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/alert.imageset/Contents.json" />
     <source-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-charged.imageset/battery-charged.pdf" />
@@ -81,11 +81,12 @@
     <source-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-low.imageset/Contents.json" />
     <source-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-validating.imageset/battery-validating.pdf" />
     <source-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-validating.imageset/Contents.json" />
-    <source-file src=" src/ios/AirTurnUI/en.lproj/AirTurnUI.strings" />
+    <source-file src=" src/ios/AirTurnUI/en.lproj/AirTurnUI.strings" />-->
 
     <resource-file src="src/ios/Main.storyboard" target="./Main.storyboard" />
+    <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets" target-dir="" />
 
-    <!--<resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/alert.imageset/alert.pdf" target="alert"/>
+    <!--<resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/alert.imageset/alert.pdf" target="Images.xcassets/alert.imageset/alert.pdf"/>
     <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/alert.imageset/Contents.json" target="alert"/>
 
     <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-charged.imageset/battery-charged.pdf" target="battery-charged" />
