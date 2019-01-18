@@ -71,8 +71,8 @@
     <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/alert.imageset/alert.pdf" />
     <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/alert.imageset/Contents.json" />
 
-    <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-changed.imageset/battery-charged.pdf" />
-    <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-changed.imageset/Contents.json" />
+    <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-charged.imageset/battery-charged.pdf" />
+    <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-charged.imageset/Contents.json" />
 
     <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-changing.imageset/battery-charging.pdf" />
     <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-changing.imageset/Contents.json" />
