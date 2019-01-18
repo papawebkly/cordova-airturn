@@ -84,7 +84,7 @@
     <source-file src=" src/ios/AirTurnUI/en.lproj/AirTurnUI.strings" />-->
 
     <resource-file src="src/ios/Main.storyboard" target="./Main.storyboard" />
-    <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets" target-dir="./Images.xcassets" />
+    <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets" target="AirTurnUI/AirTurnUIImages.xcassets" />
 
     <!--<resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/alert.imageset/alert.pdf" target="Images.xcassets/alert.imageset/alert.pdf"/>
     <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/alert.imageset/Contents.json" target="alert"/>
