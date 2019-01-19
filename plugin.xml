@@ -82,7 +82,7 @@
     <source-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-validating.imageset/battery-validating.pdf" />
     <source-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-validating.imageset/Contents.json" />-->
     
-    <source-file src=" src/ios/AirTurnUI/en.lproj/AirTurnUI.strings" />
+    <source-file src="src/ios/AirTurnUI/en.lproj/AirTurnUI.strings" />
     <resource-file src="src/ios/Main.storyboard" target="./Main.storyboard" />
     <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets" />
 
