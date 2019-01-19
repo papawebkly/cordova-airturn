@@ -80,27 +80,22 @@
     <source-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-low.imageset/battery-low.pdf" />
     <source-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-low.imageset/Contents.json" />
     <source-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-validating.imageset/battery-validating.pdf" />
-    <source-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-validating.imageset/Contents.json" />
-    <source-file src=" src/ios/AirTurnUI/en.lproj/AirTurnUI.strings" />-->
-
+    <source-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-validating.imageset/Contents.json" />-->
+    
+    <source-file src=" src/ios/AirTurnUI/en.lproj/AirTurnUI.strings" />
     <resource-file src="src/ios/Main.storyboard" target="./Main.storyboard" />
-    <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets" target="" />
+    <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets" />
 
     <!--<resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/alert.imageset/alert.pdf" target="Images.xcassets/alert.imageset/alert.pdf"/>
     <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/alert.imageset/Contents.json" target="alert"/>
-
     <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-charged.imageset/battery-charged.pdf" target="battery-charged" />
     <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-charged.imageset/Contents.json" target="battery-charged" />
-
     <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-changing.imageset/battery-charging.pdf" target="battery-charging" />
     <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-changing.imageset/Contents.json" target="battery-charging "/>
-
     <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-fault.imageset/battery-fault.pdf" target="battery-fault" />
     <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-fault.imageset/Contents.json" target="battery-fault" />
-
     <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-low.imageset/battery-low.pdf" target="battery-low" />
     <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-low.imageset/Contents.json" target="battery-low" />
-
     <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-validating.imageset/battery-validating.pdf" target="battery-validating" />
     <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-validating.imageset/Contents.json" target="battery-validating" />-->
 
