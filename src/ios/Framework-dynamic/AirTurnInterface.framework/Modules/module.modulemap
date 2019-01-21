@@ -1,0 +1,6 @@
+framework module AirTurnInterface {
+    umbrella header "AirTurnInterface.h"
+    
+    export *
+    module * { export * }
+}
