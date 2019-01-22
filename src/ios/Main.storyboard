@@ -366,8 +366,8 @@
           </tableView>
           <navigationItem key="navigationItem" title="AirTurn UI" id="OBF-DR-eYj"/>
           <userDefinedRuntimeAttributes>
-            <userDefinedRuntimeAttribute type="boolean" keyPath="supportBTLE" value="YES"/>
-            <userDefinedRuntimeAttribute type="boolean" keyPath="supportHID" value="YES"/>
+            <userDefinedRuntimeAttribute type="boolean" keyPath="supportAirDirect" value="YES"/>
+            <userDefinedRuntimeAttribute type="boolean" keyPath="supportKeyboard" value="YES"/>
           </userDefinedRuntimeAttributes>
         </tableViewController>
         <placeholder placeholderIdentifier="IBFirstResponder" id="yc9-g7-4Mj" userLabel="First Responder" sceneMemberID="firstResponder"/>
