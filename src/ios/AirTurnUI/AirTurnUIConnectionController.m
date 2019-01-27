@@ -1437,43 +1437,42 @@ WKScriptMessageHandler
         case 1: {
             if(!self.discoveredDevices.count) return;
             AirTurnPeripheral *p = self.discoveredDevices[indexPath.row];
-            switch (p.state) {
-                case AirTurnConnectionStateReady:
-                    [self presentAirTurnPeripheralControllerForPeripheral:p animated:YES];
-                    break;
-                case AirTurnConnectionStateDisconnecting:
-                case AirTurnConnectionStateDisconnected:
-                case AirTurnConnectionStateSystemConnected: // might be system connected and not requested by user
-                    if([[AirTurnCentral sharedCentral].storedAirTurns containsObject:p]) {
-                        [self presentAirTurnPeripheralControllerForPeripheral:p animated:YES];
-                    } else if(self.maxNumberOfAirDirectAirTurns > 0 && [AirTurnCentral sharedCentral].storedAirTurns.count == self.maxNumberOfAirDirectAirTurns) {
-                        UIAlertController *ac = [UIAlertController alertControllerWithTitle:AirTurnUILocalizedString(@"Max number of AirTurns", @"AirTurn max number of AirTurns") message:[NSString stringWithFormat:AirTurnUILocalizedString(@"You can only connect %d AirTurn(s) at once. To connect to this AirTurn, forget another AirTurn first", @"AirTurn max number of AirTurns message"), self.maxNumberOfAirDirectAirTurns] preferredStyle:UIAlertControllerStyleAlert];
-                        [ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"OK", @"OK button title") style:UIAlertActionStyleCancel handler:nil]];
-                        [self presentAlert:ac presentGlobally:NO animated:YES];
-                    } else if(p.hasBonding) {
-                        UIAlertController *ac = [UIAlertController alertControllerWithTitle:AirTurnUILocalizedString(@"Already bonded", @"AirTurn already bonded title") message:AirTurnUILocalizedString(@"This AirTurn is already paired to another device. Reset the AirTurn by holding power for 6s until it flashes to indicate it has reset, then try again", @"AirTurn already bonded message") preferredStyle:UIAlertControllerStyleAlert];
-                        [ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"OK", @"OK button title") style:UIAlertActionStyleCancel handler:nil]];
-                        [self presentAlert:ac presentGlobally:NO animated:YES fromPeripheral:p];
-                    } else if(!self.displayedPairingWarning) {
-                        self.displayedPairingWarning = YES;
-                        UIAlertController *ac = [UIAlertController alertControllerWithTitle:AirTurnUILocalizedString(@"Pairing Required", @"AirTurn pre-connect pairing warning title") message:AirTurnUILocalizedString(@"AirTurn requires pairing to operate.  If prompted, please tap \"Pair\"", @"AirTurn pre-connect pairing warning message") preferredStyle:UIAlertControllerStyleAlert];
-                        [ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"OK", @"OK button title") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-                            self.requestedConnectPeripheral = p;
-                            [[AirTurnCentral sharedCentral] connectToAirTurn:p];
-                        }]];
-                        [self presentAlert:ac presentGlobally:NO animated:YES];
-                    } else {
-						self.requestedConnectPeripheral = p;
-                        [[AirTurnCentral sharedCentral] connectToAirTurn:p];
-                    }
-                    [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-                    break;
-                default:
-                    if([[AirTurnCentral sharedCentral].storedAirTurns containsObject:p]) {
-                        [self presentAirTurnPeripheralControllerForPeripheral:p animated:YES];
-                    }
-                    break;
-            }
+			if([[AirTurnCentral sharedCentral].storedAirTurns containsObject:p]) {
+				[self presentAirTurnPeripheralControllerForPeripheral:p animated:YES];
+			} else {
+				switch (p.state) {
+					case AirTurnConnectionStateReady:
+						[self presentAirTurnPeripheralControllerForPeripheral:p animated:YES];
+						break;
+					case AirTurnConnectionStateDisconnecting:
+					case AirTurnConnectionStateDisconnected:
+					case AirTurnConnectionStateSystemConnected: // might be system connected and not requested by user
+						if(self.maxNumberOfAirDirectAirTurns > 0 && [AirTurnCentral sharedCentral].storedAirTurns.count == self.maxNumberOfAirDirectAirTurns) {
+							UIAlertController *ac = [UIAlertController alertControllerWithTitle:AirTurnUILocalizedString(@"Max number of AirTurns", @"AirTurn max number of AirTurns") message:[NSString stringWithFormat:AirTurnUILocalizedString(@"You can only connect %d AirTurn(s) at once. To connect to this AirTurn, forget another AirTurn first", @"AirTurn max number of AirTurns message"), self.maxNumberOfAirDirectAirTurns] preferredStyle:UIAlertControllerStyleAlert];
+							[ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"OK", @"OK button title") style:UIAlertActionStyleCancel handler:nil]];
+							[self presentAlert:ac presentGlobally:NO animated:YES];
+						} else if(p.hasBonding) {
+							UIAlertController *ac = [UIAlertController alertControllerWithTitle:AirTurnUILocalizedString(@"Already bonded", @"AirTurn already bonded title") message:AirTurnUILocalizedString(@"This AirTurn is already paired to another device. Reset the AirTurn by holding power for 6s until it flashes to indicate it has reset, then try again", @"AirTurn already bonded message") preferredStyle:UIAlertControllerStyleAlert];
+							[ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"OK", @"OK button title") style:UIAlertActionStyleCancel handler:nil]];
+							[self presentAlert:ac presentGlobally:NO animated:YES fromPeripheral:p];
+						} else if(!self.displayedPairingWarning) {
+							self.displayedPairingWarning = YES;
+							UIAlertController *ac = [UIAlertController alertControllerWithTitle:AirTurnUILocalizedString(@"Pairing Required", @"AirTurn pre-connect pairing warning title") message:AirTurnUILocalizedString(@"AirTurn requires pairing to operate.  If prompted, please tap \"Pair\"", @"AirTurn pre-connect pairing warning message") preferredStyle:UIAlertControllerStyleAlert];
+							[ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"OK", @"OK button title") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+								self.requestedConnectPeripheral = p;
+								[[AirTurnCentral sharedCentral] connectToAirTurn:p];
+							}]];
+							[self presentAlert:ac presentGlobally:NO animated:YES];
+						} else {
+							self.requestedConnectPeripheral = p;
+							[[AirTurnCentral sharedCentral] connectToAirTurn:p];
+						}
+						[self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+						break;
+					default:
+						break;
+				}
+			}
             return;
         }
         case 2:
