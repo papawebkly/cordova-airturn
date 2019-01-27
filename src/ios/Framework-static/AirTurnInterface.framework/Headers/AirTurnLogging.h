@@ -68,10 +68,17 @@ typedef NS_ENUM(NSUInteger, AirTurnLogLevel){
     AirTurnLogLevelAll       = NSUIntegerMax
 };
 
+@protocol AirTurnLoggingDelegate;
+
 /**
  AirTurn Logging Class
  */
 @interface AirTurnLogging : NSObject
+
+/**
+ Set a delegate to be passed log messages
+ */
+@property(class, nonatomic, weak, nullable) id<AirTurnLoggingDelegate> delegate;
 
 /**
  Set the framework logging level. Only logs this severe or more will be logged.
@@ -81,10 +88,49 @@ typedef NS_ENUM(NSUInteger, AirTurnLogLevel){
 + (void)setFrameworkLogLevel:(AirTurnLogLevel)logLevel;
 
 /**
- If you use CocoaLumberjack in your project but don't want AirTurn to use it (for whatever reason) then you can disable it here. By default CocoaLumberjack is used if available.
+ If you use CocoaLumberjack in your project but don't want AirTurn to use it (for whatever reason) then you can disable it here. By default CocoaLumberjack is used if available and no delegate is set.
  
  @param useCocoaLumberjack `YES` to use CocoaLumberjack if available, `NO` to disable.
  */
 + (void)setUseCocoaLumberjack:(BOOL)useCocoaLumberjack;
+
+/**
+ This class is not designed to be initialized.
+
+ @return None
+ */
+- (nonnull instancetype)init NS_UNAVAILABLE;
+
+@end
+
+/**
+ The delegate for the `AirTurnLogging` class
+ */
+@protocol AirTurnLoggingDelegate <NSObject>
+
+@required
+
+/**
+ The log delegate method. Called for every log item emitted from `AirTurnInterface` for your application to handle
+
+ @param asynchronous If the log should be processed asynchronously
+ @param level The log level
+ @param flag The log flag
+ @param context The log context
+ @param file The file the log was sent from
+ @param function The function the log was sent from
+ @param line The line of code the log was sent from
+ @param tag The log tag
+ @param message The log message
+ */
+- (void)AirTurnLog:(BOOL)asynchronous
+             level:(AirTurnLogLevel)level
+              flag:(AirTurnLogFlag)flag
+           context:(NSInteger)context
+              file:(NSString * _Nonnull)file
+          function:(NSString * _Nonnull)function
+              line:(NSUInteger)line
+               tag:(nullable id)tag
+           message:(NSString * _Nonnull)message;
 
 @end

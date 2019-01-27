@@ -86,6 +86,12 @@ typedef NS_ENUM(NSUInteger, AirTurnFirstResponderOwner) {
 @interface AirTurnKeyboardStateMonitor : NSObject
 
 /**
+ If `YES`, keyboard state reassessment will be performed when necessary to determine if an external keyboard is connected. This process requires a test view to become first responder briefly. If automatic keyboard management is not enabled this may cause the on screen keyboard to be displayed briefly. If you do not need to know the state of the external keyboard this can be set to NO. This will mean `AirTurnKeyboardStateMonitor.isExternalKeyboardConnected` and `AirTurnViewManager.connected` are invalid.
+ By default this property is `YES` if automatic keyboard management is available.
+ */
+@property(nonatomic, assign) BOOL allowKeyboardStateReassessment;
+
+/**
  The current first responder
  */
 @property(nonatomic, readonly, weak, nullable) UIView *firstResponder;
@@ -106,7 +112,7 @@ typedef NS_ENUM(NSUInteger, AirTurnFirstResponderOwner) {
 @property(nonatomic, readonly) BOOL virtualKeyboardShouldBeShown;
 
 /**
- Determines if an external hardware keyboard (e.g. BT-105) is connected. Not valid if automatic keyboard management is disabled
+ Determines if an external hardware keyboard (e.g. BT-105) is connected. Not valid if automatic keyboard management is disabled as the keyboard must be "displayed" by iOS to monitor when the external keyboard is connected or not, and when automatic keyboard management is disabled a zero rect inputView is used on UIView to prevent keyboard display without keyboard management.
  */
 @property(nonatomic, readonly) BOOL isExternalKeyboardConnected;
 

@@ -7,15 +7,27 @@
 //
 
 #import "AirTurnUIPeripheralController.h"
+#import "AirTurnUIAdvancedSettingsController.h"
 #import <AirTurnInterface/AirTurnCentral.h>
 #import <AirTurnInterface/AirTurnInterface.h>
 
 #define BlueCellColor [UIColor colorWithRed:0 green:122.0f/255.0f blue:1 alpha:1]
 
+
 #define SECTION_FORGET 0
 #define SECTION_PROGRAMMING 1
 #define SECTION_ADVANCED 2
 #define SECTION_BUTTONS 3
+
+
+NSBundle * _Nonnull AirTurnUIBundle;
+
+__attribute__((constructor)) static void initialize() {
+	AirTurnUIBundle = [NSBundle bundleWithIdentifier:@"AirTurnUI"];
+	if(AirTurnUIBundle == nil) {
+		AirTurnUIBundle = [NSBundle mainBundle];
+	}
+}
 
 typedef NS_OPTIONS(NSUInteger, AirTurnPeripheralWriteProgress) {
     AirTurnPeripheralWriteProgressDelayBeforeRepeat = 1 << 0,
@@ -23,196 +35,9 @@ typedef NS_OPTIONS(NSUInteger, AirTurnPeripheralWriteProgress) {
     AirTurnPeripheralWriteProgressIdlePowerOff = 1 << 2,
     AirTurnPeripheralWriteProgressConnectionConfiguration = 1 << 3,
     AirTurnPeripheralWriteProgressDeviceName = 1 << 4,
+    AirTurnPeripheralWriteProgressPairingMethod = 1 << 5,
+	AirTurnPeripheralWriteProgressDebounceTime = 1 << 6,
 };
-
-const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFeaturesAvailableOSKeyRepeatConfiguration | AirTurnPeripheralFeaturesAvailableConnectionSpeedConfiguration;
-
-@class AirTurnUIAdvancedSettingsController;
-
-@protocol AirTurnUIAdvancedSettingsControllerDelegate <NSObject>
-
-@required
-
-- (void)advancedSettingsControllerDidUpdateDeviceName:(AirTurnUIAdvancedSettingsController *)controller;
-
-- (void)advancedSettingsControllerDidUpdateKeyRepeatMode:(AirTurnUIAdvancedSettingsController *)controller;
-
-- (void)advancedSettingsControllerDidUpdateFastResponseEnabled:(AirTurnUIAdvancedSettingsController *)controller;
-
-@end
-
-@interface AirTurnUIAdvancedSettingsController : UITableViewController <UITextFieldDelegate>
-
-@property(nonatomic, weak) id <AirTurnUIAdvancedSettingsControllerDelegate> delegate;
-
-@property(nonatomic, strong) NSString *deviceName;
-@property(nonatomic, strong) NSString *defaultDeviceName;
-
-@property(nonatomic, strong) UITableViewCell *deviceNameCell;
-@property(nonatomic, strong) UITextField *deviceNameTextField;
-
-@property(nonatomic, assign) BOOL keyRepeatEnabled;
-@property(nonatomic, assign) BOOL isOSKeyRepeat;
-
-@property(nonatomic, assign) BOOL fastResponseEnabled;
-
-@end
-
-@implementation AirTurnUIAdvancedSettingsController
-
-- (instancetype)initWithStyle:(UITableViewStyle)style
-{
-    self = [super initWithStyle:style];
-    if (self) {
-        self.deviceNameTextField = [[UITextField alloc] init];
-        self.deviceNameTextField.borderStyle = UITextBorderStyleNone;
-        self.deviceNameTextField.clearButtonMode = UITextFieldViewModeAlways;
-        self.deviceNameTextField.delegate = self;
-        self.deviceNameTextField.returnKeyType = UIReturnKeyDone;
-        self.deviceNameTextField.keyboardType = UIKeyboardTypeASCIICapable;
-        self.deviceNameTextField.translatesAutoresizingMaskIntoConstraints = NO;
-        self.deviceNameCell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil];
-        [self.deviceNameCell.contentView addSubview:self.deviceNameTextField];
-        [self.deviceNameCell.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-15-[tf]-15-|" options:0 metrics:nil views:@{@"tf":self.deviceNameTextField}]];
-        [self.deviceNameCell.contentView addConstraint:[NSLayoutConstraint constraintWithItem:self.deviceNameCell.contentView attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self.deviceNameTextField attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
-        self.deviceNameCell.selectionStyle = UITableViewCellSelectionStyleNone;
-    }
-    return self;
-}
-
-- (void)setDefaultDeviceName:(NSString *)defaultDeviceName {
-    self.deviceNameTextField.placeholder = defaultDeviceName;
-}
-
-- (void)setDeviceName:(NSString *)deviceName {
-    self.deviceNameTextField.text = deviceName;
-}
-
-- (NSString *)deviceName {
-    return self.deviceNameTextField.text;
-}
-
-- (void)viewWillAppear:(BOOL)animated {
-    [super viewWillAppear:animated];
-    [self.tableView reloadData];
-}
-
-- (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
-    return string.length - range.length + textField.text.length <= AirTurnPeripheralMaxDeviceNameLength;
-}
-
-- (void)textFieldDidEndEditing:(UITextField *)textField {
-    [self.delegate advancedSettingsControllerDidUpdateDeviceName:self];
-}
-
-- (BOOL)textFieldShouldReturn:(UITextField *)textField {
-    [self.deviceNameTextField resignFirstResponder];
-    return NO;
-}
-
-- (BOOL)isVisible {
-    return [self isViewLoaded] && self.view.window;
-}
-
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return _keyRepeatEnabled ? 3 : 2;
-}
-
-- (NSUInteger)codeSectionForRealSection:(NSUInteger)section {
-    if(!_keyRepeatEnabled && section >= 1) {
-        return section + 1;
-    }
-    return section;
-}
-
-- (NSUInteger)realSectionForCodeSection:(NSUInteger)section {
-    return section + section - [self codeSectionForRealSection:section];
-}
-
-- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-    switch ([self codeSectionForRealSection:section]) {
-        case 0: return AirTurnUILocalizedString(@"Device name", @"Device name section heading");
-        case 1: return AirTurnUILocalizedString(@"Key repeat mode", @"Key repeat mode section heading");
-        case 2: return AirTurnUILocalizedString(@"Connection speed", @"Connection speed section heading");
-    }
-    return nil;
-}
-
-- (NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section {
-    switch ([self codeSectionForRealSection:section]) {
-        case 1: return AirTurnUILocalizedString(@"By default, PED uses your configured key repeat settings in modes 2-5. Alternatively, you can use the key repeat settings configured on the Operating System. This will disable key repeat for mode 1", @"Key repeat mode description");
-        case 2: return AirTurnUILocalizedString(@"By default, PED reduces its connection speed to conserve battery power. Alternatively you can increase the connection speed so pedal presses are more responsive", @"Connection speed description");
-    }
-    return nil;
-}
-
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return section == 0 ? 1 : 2;
-}
-
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    NSUInteger section = [self codeSectionForRealSection:indexPath.section];
-    UITableViewCell *c = nil;
-    switch (section) {
-        case 0:
-            return self.deviceNameCell;
-        case 1:
-            c = [tableView dequeueReusableCellWithIdentifier:@"keyRepeat"];
-            if(!c) {
-                c = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"keyRepeat"];
-            }
-            switch (indexPath.row) {
-                case 0:
-                    c.textLabel.text = AirTurnUILocalizedString(@"PED key repeat", @"PED key repeat setting cell");
-                    c.accessoryType = _isOSKeyRepeat ? UITableViewCellAccessoryNone : UITableViewCellAccessoryCheckmark;
-                    break;
-                case 1:
-                    c.textLabel.text = AirTurnUILocalizedString(@"OS key repeat", @"OS key repeat setting cell");
-                    c.accessoryType = _isOSKeyRepeat ? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone;
-                    break;
-            }
-            break;
-        case 2:
-            c = [tableView dequeueReusableCellWithIdentifier:@"connectionSpeed"];
-            if(!c) {
-                c = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"connectionSpeed"];
-            }
-            switch (indexPath.row) {
-                case 0:
-                    c.textLabel.text = AirTurnUILocalizedString(@"Low power mode", @"Low power setting cell");
-                    c.accessoryType = _fastResponseEnabled ? UITableViewCellAccessoryNone : UITableViewCellAccessoryCheckmark;
-                    break;
-                case 1:
-                    c.textLabel.text = AirTurnUILocalizedString(@"Fast response", @"Fast response setting cell");
-                    c.accessoryType = _fastResponseEnabled ? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone;
-                    break;
-            }
-            break;
-        default:
-            c = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil];
-            break;
-    }
-    return c;
-}
-
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    NSUInteger section = [self codeSectionForRealSection:indexPath.section];
-    switch (section) {
-        case 1:
-            self.isOSKeyRepeat = indexPath.row == 1;
-            [tableView reloadSections:[NSIndexSet indexSetWithIndex:indexPath.section] withRowAnimation:UITableViewRowAnimationAutomatic];
-            [self.delegate advancedSettingsControllerDidUpdateKeyRepeatMode:self];
-            break;
-        case 2:
-            self.fastResponseEnabled = indexPath.row == 1;
-            [tableView reloadSections:[NSIndexSet indexSetWithIndex:indexPath.section] withRowAnimation:UITableViewRowAnimationAutomatic];
-            [self.delegate advancedSettingsControllerDidUpdateFastResponseEnabled:self];
-            break;
-    }
-}
-
-@end
 
 @interface AirTurnUIPeripheralController () <AirTurnUIAdvancedSettingsControllerDelegate
 >
@@ -227,6 +52,7 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
 @property(nonatomic, assign) BOOL defaultValues;
 @property(nonatomic, assign) AirTurnPeripheralWriteProgress writeProgress;
 
+@property(nonatomic, readonly) BOOL showPortConfig;
 @property(nonatomic, readonly) BOOL showAdvanced;
 
 @property(nonatomic, strong) NSArray *idlePowerOffValueMapping;
@@ -252,6 +78,7 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
 
 @property(nonatomic, readonly) BOOL isProgramming;
 
+
 @end
 
 @implementation AirTurnUIPeripheralController
@@ -264,16 +91,24 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
         [nc addObserver:self selector:@selector(peripheralConnectionStateChanged:) name:AirTurnConnectionStateChangedNotification object:peripheral];
         [nc addObserver:self selector:@selector(peripheralWriteComplete:) name:AirTurnWriteCompleteNotification object:peripheral];
         [nc addObserver:self selector:@selector(peripheralDidUpdateName:) name:AirTurnDidUpdateNameNotification object:peripheral];
+        [nc addObserver:self selector:@selector(peripheralDidUpdatePairingState:) name:AirTurnDidUpdatePairingStateNotification object:peripheral];
+		[nc addObserver:self selector:@selector(peripheralDidUpdateCurrentMode:) name:AirTurnDidUpdateCurrentModeNotification object:peripheral];
         
         self.tableView.rowHeight = UITableViewAutomaticDimension;
-        self.tableView.estimatedRowHeight = 44;
+        
+        // fix for scrolling issues in iOS 11
+        self.tableView.estimatedRowHeight = 0;
+        self.tableView.estimatedSectionHeaderHeight = 0;
+        self.tableView.estimatedSectionFooterHeight = 0;
         
         self.navigationItem.title = peripheral.name;
         
         self.advancedSettingsController = [[AirTurnUIAdvancedSettingsController alloc] initWithStyle:UITableViewStyleGrouped];
         self.advancedSettingsController.delegate = self;
-        self.advancedSettingsController.navigationItem.title = AirTurnUILocalizedString(@"Advanced", @"Advanced settings nav title");
         self.advancedSettingsController.defaultDeviceName = self.peripheral.defaultName;
+        self.advancedSettingsController.pairingMethodEnabled = [self.peripheral hasFeatures:AirTurnPeripheralFeaturesAvailablePairingMethod];
+        [self peripheralDidUpdatePairingState:nil];
+		self.advancedSettingsController.debounceTimeEnabled = [self.peripheral hasFeatures:AirTurnPeripheralFeaturesAvailableDebounceTime];
         
         self.keyRepeatToggleCell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil];
         self.keyRepeatToggleCell.textLabel.text = AirTurnUILocalizedString(@"Auto-repeat", @"String to toggle the key repeat");
@@ -384,7 +219,11 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
             [self.idlePowerOffCell.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-(insetLeft)-[sl]-(insetRight)-|" options:0 metrics:insets views:d]];
         }
         
-        [self resetToDeviceValues];
+        [self.tableView reloadData];
+		
+		if(peripheral.state == AirTurnConnectionStateReady && self.peripheral.deviceType != AirTurnDeviceTypevPED) {
+			[self resetToDeviceValues];
+		}
     }
     return self;
 }
@@ -408,6 +247,7 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
     [self.tableView addObserver:self forKeyPath:@"contentSize" options:NSKeyValueObservingOptionNew context:nil];
 }
 
+
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     if([keyPath isEqualToString:@"contentSize"]) {
         CGSize size = [self preferredContentSize];
@@ -428,6 +268,7 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
     return [self.peripheral hasFeatures:advancedFeatures];
 }
 
+
 - (void)allSlidersChanged {
     [self delayBRSliderChanged:self.delayBRSlider];
     [self repeatRateSliderChanged:self.repeatRateSlider];
@@ -436,15 +277,27 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
 
 - (void)resetToDeviceValues {
     // before keyRepeatEnabled as setter uses these values
-    self.advancedSettingsController.keyRepeatEnabled = self.peripheral.keyRepeatEnabled;
-    self.advancedSettingsController.isOSKeyRepeat = self.peripheral.OSKeyRepeat;
-    
+	if([self.peripheral hasFeatures:AirTurnPeripheralFeaturesAvailableExtendedPortConfig]) {
+		self.advancedSettingsController.keyRepeatEnabled = NO;
+		self.advancedSettingsController.isOSKeyRepeat = NO;
+	} else {
+		self.advancedSettingsController.keyRepeatEnabled = self.peripheral.keyRepeatEnabled;
+		self.advancedSettingsController.isOSKeyRepeat = self.peripheral.OSKeyRepeat;
+	}
+	
     self.keyRepeatEnabled = self.peripheral.keyRepeatEnabled;
     self.delayBRSlider.value = self.keyRepeatEnabled ? self.peripheral.delayBeforeRepeatMultiplier : AirTurnPeripheralDefaultDelayBeforeRepeat;
     self.repeatRateSlider.value = self.keyRepeatEnabled ? self.peripheral.repeatRateDivisor : AirTurnPeripheralDefaultKeyRepeatRate;
     self.idlePowerOffSlider.value = [self getClosestPowerOffIndexToValue:self.peripheral.idlePowerOff];
     self.advancedSettingsController.deviceName = self.peripheral.name;
     self.advancedSettingsController.fastResponseEnabled = self.peripheral.connectionConfiguration == AirTurnPeripheralConnectionConfigurationLowLatency;
+    if(self.advancedSettingsController.pairingMethodEnabled) {
+        self.advancedSettingsController.pairingMethod = self.peripheral.pairingMethod;
+    }
+	if(self.advancedSettingsController.debounceTimeEnabled) {
+		self.advancedSettingsController.debounceTime = self.peripheral.debounceTime;
+	}
+    
    
     // prevent slider changed doing value changed repeatedly
     _defaultValues = NO;
@@ -459,9 +312,21 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
     self.repeatRateSlider.value = AirTurnPeripheralDefaultKeyRepeatRate;
     self.idlePowerOffSlider.value = [self getClosestPowerOffIndexToValue:AirTurnPeripheralDefaultIdlePowerOff];
     self.advancedSettingsController.deviceName = self.peripheral.defaultName;
-    self.advancedSettingsController.keyRepeatEnabled = AirTurnPeripheralDefaultKeyRepeatEnabled;
-    self.advancedSettingsController.isOSKeyRepeat = AirTurnPeripheralDefaultOSKeyRepeatEnabled;
+	if([self.peripheral hasFeatures:AirTurnPeripheralFeaturesAvailableExtendedPortConfig]) {
+		self.advancedSettingsController.keyRepeatEnabled = NO;
+		self.advancedSettingsController.isOSKeyRepeat = NO;
+	} else {
+		self.advancedSettingsController.keyRepeatEnabled = AirTurnPeripheralDefaultKeyRepeatEnabled;
+		self.advancedSettingsController.isOSKeyRepeat = AirTurnPeripheralDefaultOSKeyRepeatEnabled;
+	}
     self.advancedSettingsController.fastResponseEnabled = AirTurnPeripheralDefaultConnectionConfiguration == AirTurnPeripheralConnectionConfigurationLowLatency;
+    if(self.advancedSettingsController.pairingMethodEnabled) {
+        self.advancedSettingsController.pairingMethod = AirTurnPeripheralPairingMethodOpen;
+    }
+	if(self.advancedSettingsController.debounceTimeEnabled) {
+		self.advancedSettingsController.debounceTime = self.peripheral.defaultDebounceTime;
+	}
+    
     
     // prevent slider changed doing value changed repeatedly
     _defaultValues = NO;
@@ -496,11 +361,19 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
     return [self.advancedSettingsController.deviceName isEqual:self.peripheral.name];
 }
 
+- (BOOL)isPairingMethodDeviceValue {
+    return ![self.peripheral hasFeatures:AirTurnPeripheralFeaturesAvailablePairingMethod] || self.advancedSettingsController.pairingMethod == self.peripheral.pairingMethod;
+}
+
+- (BOOL)isDebounceTimeDeviceValue {
+	return ![self.peripheral hasFeatures:AirTurnPeripheralFeaturesAvailableDebounceTime] || self.advancedSettingsController.debounceTime == self.peripheral.debounceTime;
+}
+
 - (BOOL)isDeviceValues {
     return
         [self isKeyRepeatDeviceValue] &&
         [self isIdlePowerOffDeviceValue] &&
-        (![self showAdvanced] || ([self isConnectionControlDeviceValue] && [self isDeviceNameDeviceValue]));
+        (![self showAdvanced] || ([self isConnectionControlDeviceValue] && [self isDeviceNameDeviceValue] && [self isPairingMethodDeviceValue] && [self isDebounceTimeDeviceValue]));
 }
 
 - (BOOL)isDefaultValues {
@@ -512,7 +385,9 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
           self.repeatRateSlider.value == AirTurnPeripheralDefaultKeyRepeatRate)) &&
         self.idlePowerOffSlider.value == [self getClosestPowerOffIndexToValue:AirTurnPeripheralDefaultIdlePowerOff] &&
         !self.advancedSettingsController.fastResponseEnabled &&
-        (self.peripheral.defaultName == nil || [self.advancedSettingsController.deviceName isEqualToString:(NSString * _Nonnull)self.peripheral.defaultName]);
+        (self.peripheral.defaultName == nil || [self.advancedSettingsController.deviceName isEqualToString:(NSString * _Nonnull)self.peripheral.defaultName]) &&
+        (![self.peripheral hasFeatures:AirTurnPeripheralFeaturesAvailablePairingMethod] || self.advancedSettingsController.pairingMethod == AirTurnPeripheralPairingMethodOpen) &&
+		(![self.peripheral hasFeatures:AirTurnPeripheralFeaturesAvailableDebounceTime] || self.advancedSettingsController.debounceTime == self.peripheral.defaultDebounceTime);
 }
 
 - (void)valueChanged {
@@ -535,6 +410,12 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
     if(![self isDeviceNameDeviceValue]) {
         tasks |= AirTurnPeripheralWriteProgressDeviceName;
     }
+    if(![self isPairingMethodDeviceValue]) {
+        tasks |= AirTurnPeripheralWriteProgressPairingMethod;
+    }
+	if(![self isDebounceTimeDeviceValue]) {
+		tasks |= AirTurnPeripheralWriteProgressDebounceTime;
+	}
     return tasks;
 }
 
@@ -561,6 +442,23 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
         [self.peripheral storeDeviceName:self.advancedSettingsController.deviceName];
         _writeProgress ^= AirTurnPeripheralWriteProgressDeviceName;
     }
+    if(_writeProgress & AirTurnPeripheralWriteProgressPairingMethod) {
+        void(^writeNow)(void) = ^(void) {
+            [self.peripheral writePairingMethod:self.advancedSettingsController.pairingMethod];
+        };
+        if(self.peripheral.pairingState == AirTurnPeripheralPairingStateNotPaired && self.advancedSettingsController.pairingMethod == AirTurnPeripheralPairingMethodClosed) {
+            UIAlertController *ac = [UIAlertController alertControllerWithTitle:AirTurnUILocalizedString(@"Pairing required", @"Switch to closed when not paired warning title") message:AirTurnUILocalizedString(@"As this AirTurn is not paired and you are switching to Closed method, pairing will be required. When prompted, tap \"Pair\"", @"Switch to closed when not paired warning message") preferredStyle:UIAlertControllerStyleAlert];
+            [ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"OK", @"OK") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                writeNow();
+            }]];
+            [self presentViewController:ac animated:YES completion:nil];
+        } else {
+            writeNow();
+        }
+    }
+	if(_writeProgress & AirTurnPeripheralWriteProgressDebounceTime) {
+		[self.peripheral writeDebounceTime:self.advancedSettingsController.debounceTime];
+	}
     if(_writeProgress == 0) {
         [self programmingComplete];
     } else {
@@ -570,6 +468,7 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
 
 - (void)programmingComplete {
     _deviceValues = YES;
+    [self resetToDeviceValues];
     [self.tableView reloadData];
 }
 
@@ -588,12 +487,14 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
         }
     }
     self.keyRepeatToggleCell.accessoryType = keyRepeatEnabled ? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone;
-    self.advancedSettingsController.keyRepeatEnabled = keyRepeatEnabled;
+    self.advancedSettingsController.keyRepeatEnabled = ![self.peripheral hasFeatures:AirTurnPeripheralFeaturesAvailableExtendedPortConfig] && keyRepeatEnabled;
     [self valueChanged];
 }
 
 - (BOOL)isActivityLocked {
-    return self.isProgramming;}
+    return self.isProgramming;
+}
+
 
 - (BOOL)isVisible {
     return [self isViewLoaded] && self.view.window;
@@ -667,7 +568,7 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
 - (NSInteger)codeSectionForRealSection:(NSInteger)section {
     if(self.peripheral.state == AirTurnConnectionStateReady) {
         NSUInteger ret = section;
-        if(![self showAdvanced] && section >= SECTION_ADVANCED) {
+        if(!self.showAdvanced && ret >= SECTION_ADVANCED) {
             ret += 1;
         }
         return ret;
@@ -680,10 +581,9 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-
     if(self.peripheral.state != AirTurnConnectionStateReady || self.peripheral.deviceType == AirTurnDeviceTypevPED) { return 1; } // forget cell
     NSInteger ret = SECTION_BUTTONS + 1; // convert last section index to count
-    if(![self showAdvanced]) {
+    if(!self.showAdvanced) {
         ret -= 1;
     }
     return ret;
@@ -694,7 +594,7 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
         case SECTION_FORGET:
             return AirTurnUILocalizedString(@"Forgetting an AirTurn stops the App automatically connecting", @"Forget footer text");
         case SECTION_BUTTONS:
-            return [NSString stringWithFormat:@"F: %@  H: %@", self.peripheral.firmwareVersion, self.peripheral.hardwareVersion];
+			return [NSString stringWithFormat:@"F: %@  H: %@%@", self.peripheral.firmwareVersion, self.peripheral.hardwareVersion, self.peripheral.currentMode == AirTurnModeNone ? @"" : [NSString stringWithFormat:AirTurnUILocalizedString(@" Mode %d", @"Current mode label"), self.peripheral.currentMode]];
     }
     return nil;
 }
@@ -809,7 +709,7 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
                 c.textLabel.text = AirTurnUILocalizedString(@"Advanced", @"Advanced table view cell");
                 c.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
             }
-            if([self isActivityLocked]) {
+            if(self.isActivityLocked) {
                 c.textLabel.textColor = [UIColor grayColor];
                 c.selectionStyle = UITableViewCellSelectionStyleNone;
             } else {
@@ -947,6 +847,12 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
         case AirTurnErrorContextWritingConnectionConfiguration:
             errorContext = AirTurnUILocalizedString(@"writing connection configuration", @"Writing connection configuration context");
             break;
+        case AirTurnErrorContextWritingPairingMethod:
+            errorContext = AirTurnUILocalizedString(@"writing pairing method", @"Writing pairing method context");
+            break;
+		case AirTurnErrorContextWritingDebounceTime:
+			errorContext = AirTurnUILocalizedString(@"writing debounce time", @"Writing debounce time context");
+			break;
     }
     if([error.domain isEqualToString:AirTurnCentralErrorDomain]) {
         switch ((AirTurnCentralError)error.code) {
@@ -1044,6 +950,13 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
                 tryAgain = NO;
                 toggleBluetooth = YES;
                 break;
+            case AirTurnPeripheralErrorUnsupportedFeature:
+                errorMessage = AirTurnUILocalizedString(@"This action is unsupported on this device", @"Unsupported feature peripheral error message");
+                tryAgain = NO;
+                break;
+            case AirTurnPeripheralErrorInvalidState:
+                errorMessage = AirTurnUILocalizedString(@"The AirTurn is in an invalid state to perform this action", @"Invalid state peripheral error message");
+                break;
         }
     }
     if(result == AirTurnErrorHandlingResultNotHandled) {
@@ -1051,7 +964,7 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
             result = AirTurnErrorHandlingResultAlert;
         } else {
             errorTitle = AirTurnUILocalizedString(@"Unknown error!", @"Unknown error title");
-            errorMessage = [NSString stringWithFormat:AirTurnUILocalizedString(@"An unknown error occurred. If this keeps happening, try updating the App or contact support. (%@)", @"Unknown error message"), error.localizedDescription];
+            errorMessage = [NSString stringWithFormat:AirTurnUILocalizedString(@"An unknown error occurred. If this keeps happening, try updating the App or contact support. (%@)", @"Unknown error message"), error.description];
             tryAgain = NO;
             contactSupport = NO;
         }
@@ -1078,7 +991,14 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
         [ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"Dismiss", @"Error dismiss button") style:UIAlertActionStyleCancel handler:dismissHandler]];
         if(removePairing) {
             UIAlertAction *a = [UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"iOS Settings", @"iOS settings alert button") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                [[UIApplication sharedApplication] openURL:(NSURL * _Nonnull)[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+				
+				if(@available(iOS 10.0, *)) {
+					[[UIApplication sharedApplication] openURL:(NSURL * _Nonnull)[NSURL URLWithString:UIApplicationOpenSettingsURLString] options:@{} completionHandler:nil];
+				} else {
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_10_0
+					[[UIApplication sharedApplication] openURL:(NSURL * _Nonnull)[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+#endif
+				}
                 if(dismissHandler) {
                     dismissHandler(action);
                 }
@@ -1153,8 +1073,14 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
             progress = AirTurnPeripheralWriteProgressConnectionConfiguration;
             errorContext = AirTurnErrorContextWritingConnectionConfiguration;
             break;
-        default:
+        case AirTurnPeripheralWriteTypePairingMethod:
+            progress = AirTurnPeripheralWriteProgressPairingMethod;
+            errorContext = AirTurnErrorContextWritingPairingMethod;
             break;
+		case AirTurnPeripheralWriteTypeDebounceTime:
+			progress = AirTurnPeripheralWriteProgressDebounceTime;
+			errorContext = AirTurnErrorContextWritingDebounceTime;
+			break;
     }
     if(error) {
         [self handleError:error context:errorContext];
@@ -1166,6 +1092,16 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
 - (void)peripheralDidUpdateName:(NSNotification *)n {
     self.navigationItem.title = self.peripheral.name;
     self.advancedSettingsController.deviceName = self.peripheral.name;
+}
+
+- (void)peripheralDidUpdatePairingState:(NSNotification *)n {
+    self.advancedSettingsController.pairingState = self.peripheral.pairingState;
+    self.advancedSettingsController.numberOfPairedDevices = self.peripheral.numberOfPairedDevices;
+}
+
+- (void)peripheralDidUpdateCurrentMode:(NSNotification *)n {
+	// reload footer
+	[self.tableView reloadSections:[NSIndexSet indexSetWithIndex:[self realSectionForCodeSection:SECTION_BUTTONS]] withRowAnimation:UITableViewRowAnimationNone];
 }
 
 #pragma mark Advanced Settings Delegate
@@ -1182,5 +1118,14 @@ const AirTurnPeripheralFeaturesAvailable advancedFeatures = AirTurnPeripheralFea
     [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:[self realSectionForCodeSection:SECTION_PROGRAMMING]] withRowAnimation:UITableViewRowAnimationNone];
     [self valueChanged];
 }
+
+- (void)advancedSettingsControllerDidUpdatePairingMethod:(AirTurnUIAdvancedSettingsController *)controller {
+    [self valueChanged];
+}
+
+- (void)advancedSettingsControllerDidUpdateDebounceTime:(AirTurnUIAdvancedSettingsController *)controller {
+	[self valueChanged];
+}
+
 
 @end

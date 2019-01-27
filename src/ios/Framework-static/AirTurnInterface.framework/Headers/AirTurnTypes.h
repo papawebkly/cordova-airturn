@@ -187,6 +187,11 @@ AIRTURN_EXTERN NSString * _Nonnull const AirTurnInvalidatedNotification;
 AIRTURN_EXTERN NSString * _Nonnull const AirTurnWriteCompleteNotification;
 
 /**
+ A notification indicating the current mode of the peripheral has changed. The `userInfo` dictionary contains all standard keys. The posting object is the `AirTurnPeripheral`.
+ */
+AIRTURN_EXTERN NSString * _Nonnull const AirTurnDidUpdateCurrentModeNotification;
+
+/**
  The notification `userInfo` key for the type of value just written on write complete notification. The value is an `NSNumber` object containing an integer which is one of the `AirTurnPeripheralWriteType` values.
  */
 AIRTURN_EXTERN NSString * _Nonnull const AirTurnWriteTypeKey;
@@ -205,6 +210,11 @@ AIRTURN_EXTERN NSString * _Nonnull const AirTurnDidUpdateChargingStateNotificati
  A notification indicating the battery level of the peripheral has changed. The `userInfo` dictionary contains all standard keys. The posting object is the `AirTurnPeripheral`.
  */
 AIRTURN_EXTERN NSString * _Nonnull const AirTurnDidUpdateBatteryLevelNotification;
+
+/**
+ A notification indicating the pairing state of the peripheral has changed. The `userInfo` dictionary contains all standard keys. The posting object is the `AirTurnPeripheral`.
+ */
+AIRTURN_EXTERN NSString * _Nonnull const AirTurnDidUpdatePairingStateNotification;
 
 /// ---------------------------------
 /// @name Keyboard Notifications
@@ -263,49 +273,57 @@ AIRTURN_EXTERN NSString * _Nonnull const AirTurnVirtualKeyboardAnimationDuration
 /**
  Represents the current mode of the AirTurn
  */
-typedef NS_ENUM(NSUInteger, AirTurnPeripheralMode) {
+typedef NS_ENUM(NSUInteger, AirTurnMode) {
     /**
      No mode
      */
-    AirTurnPeripheralModeNone = 0,
+    AirTurnModeNone = 0,
     /**
      Mode 1 – iOS mode
      */
-    AirTurnPeripheralMode1 = 1,
+    AirTurnMode1 = 1,
     /**
      Mode 2 – Programmable mode 2
      */
-    AirTurnPeripheralMode2,
+    AirTurnMode2,
     /**
      Mode 3 – Programmable mode 3
      */
-    AirTurnPeripheralMode3,
+    AirTurnMode3,
     /**
      Mode 4 – Programmable mode 4
      */
-    AirTurnPeripheralMode4,
+    AirTurnMode4,
     /**
      Mode 5 – Programmable mode 5
      */
-    AirTurnPeripheralMode5,
+    AirTurnMode5,
     /**
      Programmable mode 6
      */
-    AirTurnPeripheralMode6,
+    AirTurnMode6,
+    /**
+     Programmable mode 7
+     */
+    AirTurnMode7,
+    /**
+     Programmable mode 8
+     */
+    AirTurnMode8,
     /**
      The minimum mode value
      */
-    AirTurnPeripheralModeMinimum = AirTurnPeripheralMode1,
+    AirTurnModeMinimum = AirTurnMode1,
     /**
      The maximum mode value
      */
-    AirTurnPeripheralModeMaximum = AirTurnPeripheralMode6
+    AirTurnModeMaximum = AirTurnMode8
 };
 
 /**
- Defines the number of modes available, equal to `AirTurnPeripheralModeMaximum - AirTurnPeripheralModeMinimum + 1`
+ Defines the number of modes available, equal to `AirTurnModeMaximum - AirTurnModeMinimum + 1`
  */
-extern const NSUInteger AirTurnPeripheralModeNumberOfModes;
+extern const NSUInteger AirTurnModeMaxNumberOfModes;
 
 /**
  Constants defining the AirTurn port numbers
@@ -360,7 +378,7 @@ typedef NS_ENUM(NSInteger, AirTurnPort) {
 /**
  Defines the number of ports available, equal to `AirTurnPortMaximum - AirTurnPortMinimum + 1`
  */
-extern const NSUInteger AirTurnPortNumberOfPorts;
+extern const NSUInteger AirTurnPortMaxNumberOfPorts;
 
 /**
  Constants defining the AirTurn port states
@@ -411,7 +429,45 @@ typedef NS_ENUM(NSInteger, AirTurnDeviceType) {
     /**
      AirTurn DIGIT device type
      */
-    AirTurnDeviceTypeDIGIT3
+    AirTurnDeviceTypeDIGIT3,
+    /**
+     AirTurn BT200 device type
+     */
+    AirTurnDeviceTypeBT200,
+    /**
+     AirTurn BT200S-2 device type
+     */
+    AirTurnDeviceTypeBT200S_2,
+    /**
+     AirTurn BT200S-4 device type
+     */
+    AirTurnDeviceTypeBT200S_4,
+    /**
+     AirTurn BT200S-6 device type
+     */
+    AirTurnDeviceTypeBT200S_6,
+};
+
+/**
+ Constants defining the type of inputs the AirTurn has.
+ */
+typedef NS_ENUM(NSUInteger, AirTurnInputType) {
+	/**
+	 AirTurn has 'port' inputs. Examples include older keyboard only devices and unknown devices.
+	 */
+	AirTurnInputTypePort,
+	/**
+	 AirTurn has 'pedal' inputs. Examples include PEDpro.
+	 */
+	AirTurnInputTypePedal,
+	/**
+	 AirTurn has 'switch' inputs. Examples include BT200S-2
+	 */
+	AirTurnInputTypeSwitch,
+	/**
+	 AirTurn has 'button' inputs. Examples include DIGITIII
+	 */
+	AirTurnInputTypeButton
 };
 
 /**
@@ -449,6 +505,44 @@ typedef NS_ENUM(NSInteger, AirTurnConnectionState) {
 };
 
 /**
+ Defines which features are available for a mode
+ */
+typedef NS_OPTIONS(uint16_t, AirTurnModeFeatures) {
+    /**
+     Digital port config is available for this mode
+     */
+    AirTurnModeFeaturesDigitalPortConfig = 1 << 0,
+    /**
+     Proprietary output is available for this mode
+     */
+    AirTurnModeFeaturesProprietary = 1 << 2,
+    /**
+     Keyboard output is available for this mode
+     */
+    AirTurnModeFeaturesKeyboard = 1 << 3,
+    /**
+     Consumer output is available for this mode
+     */
+    AirTurnModeFeaturesConsumer = 1 << 4,
+    /**
+     Mouse output is available for this mode
+     */
+    AirTurnModeFeaturesMouse = 1 << 5,
+    /**
+     Joystick output is available for this mode
+     */
+    AirTurnModeFeaturesJoystick = 1 << 6,
+    /**
+     MIDI output is available for this mode
+     */
+    AirTurnModeFeaturesMIDI = 1 << 7,
+	/**
+	 A mask of mode features that represent port configuration types
+	 */
+	AirTurnModeFeaturesPortConfigurationTypesMask = AirTurnModeFeaturesKeyboard | AirTurnModeFeaturesConsumer | AirTurnModeFeaturesMouse | AirTurnModeFeaturesJoystick | AirTurnModeFeaturesMIDI
+};
+
+/**
  Defines which value has been written
  */
 typedef NS_ENUM(NSInteger, AirTurnPeripheralWriteType) {
@@ -467,7 +561,15 @@ typedef NS_ENUM(NSInteger, AirTurnPeripheralWriteType) {
     /**
      The connection configuration has been written
      */
-    AirTurnPeripheralWriteTypeConnectionConfiguration
+    AirTurnPeripheralWriteTypeConnectionConfiguration,
+    /**
+     The pairing method has been written
+     */
+    AirTurnPeripheralWriteTypePairingMethod,
+	/**
+	 The debounce time has been written
+	 */
+	AirTurnPeripheralWriteTypeDebounceTime,
 };
 
 /**
@@ -500,6 +602,14 @@ typedef NS_ENUM(uint8_t, AirTurnPeripheralChargingState) {
      The device is connected to external power and is fully charged
      */
     AirTurnPeripheralChargingStateConnectedFullyCharged,
+    /**
+     The device is connected to external power and the battery is being validated before charging begins
+     */
+    AirTurnPeripheralChargingStateConnectedValidating,
+    /**
+     The device is connected to external power and a fault occurred during charging
+     */
+    AirTurnPeripheralChargingStateConnectedFault
 };
 
 /**
@@ -517,7 +627,19 @@ typedef NS_OPTIONS(NSUInteger, AirTurnPeripheralFeaturesAvailable){
     /**
      Indicates port configuration is available
      */
-    AirTurnPeripheralFeaturesAvailablePortConfig = 1 << 2
+    AirTurnPeripheralFeaturesAvailablePortConfig = 1 << 2,
+    /**
+     Indicates pairing method configuration is available
+     */
+    AirTurnPeripheralFeaturesAvailablePairingMethod = 1 << 4,
+	/**
+	 Indicates extended port configuration is available
+	 */
+	AirTurnPeripheralFeaturesAvailableExtendedPortConfig = 1 << 5,
+	/**
+	 Indicates debounce time configuration is available
+	 */
+	AirTurnPeripheralFeaturesAvailableDebounceTime = 1 << 6,
 };
 
 /**
@@ -557,6 +679,39 @@ typedef NS_ENUM(NSInteger, AirTurnCentralState) {
      */
     AirTurnCentralStateConnected
 };
+
+/**
+ The pairing state between the central and peripheral
+ */
+typedef NS_ENUM(uint8_t, AirTurnPeripheralPairingState) {
+    /**
+     There is no pairing between the central and peripheral
+     */
+    AirTurnPeripheralPairingStateNotPaired,
+    /**
+     A pairing exists between the central and peripheral
+     */
+    AirTurnPeripheralPairingStatePaired
+};
+
+/**
+ The pairing method the AirTurn is in
+ */
+typedef NS_ENUM(uint8_t, AirTurnPeripheralPairingMethod) {
+    /**
+     If the AirTurn is in 'Open method' it will not require pairing in mode 1, but will require it in other modes. It can pair with up to 8 devices, after which it will delete the pairing which has not been used for the longest period of time.
+     */
+    AirTurnPeripheralPairingMethodOpen,
+    /**
+     If the AirTurn is in 'Closed method' it will only pair with one device. Pairing is required in all modes.
+     */
+    AirTurnPeripheralPairingMethodClosed
+};
+
+/**
+ A type for debounce time durations
+ */
+typedef uint16_t AirTurnPeripheralDebounceTime;
 
 /**
  Defines the max delay before repeat in seconds

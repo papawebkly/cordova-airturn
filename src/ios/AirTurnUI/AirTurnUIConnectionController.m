@@ -11,6 +11,7 @@
 #import <AirTurnInterface/AirTurnKeyboardManager.h>
 #import <WebKit/WebKit.h>
 
+
 #define SECTION_ENABLE 0
 #define SECTION_DEVICES 1
 #define SECTION_SWITCH_MODE 2
@@ -132,6 +133,7 @@ WKScriptMessageHandler
 @property(nonatomic, assign) BOOL supportAirDirect;
 
 @property(nonatomic, readonly) BOOL isPoweredOn;
+
 
 - (IBAction)dismiss:(id)sender;
 
@@ -337,6 +339,7 @@ WKScriptMessageHandler
     }
 #endif
     
+    
     self.navigationItem.title = @"AirTurn";
     
     UIButton *infoButton = [UIButton buttonWithType:UIButtonTypeInfoLight];
@@ -422,7 +425,7 @@ WKScriptMessageHandler
     // constraints
     NSDictionary *d = @{@"l":l,@"av":av};
     [v.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-15-[l]-[av]" options:0 metrics:nil views:d]];
-    [v.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-15.5-[l]-6.5-|" options:0 metrics:nil views:d]];
+    [v.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|-15.5@999-[l]-6.5-|" options:0 metrics:nil views:d]];
     [v.contentView addConstraint:[NSLayoutConstraint constraintWithItem:l attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:av attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
     
     self.KeyboardKeyInfoTableFooter = [UILabel new];
@@ -673,7 +676,14 @@ WKScriptMessageHandler
 #if TARGET_OS_SIMULATOR
 - (void)addMockPeripheral {
     if(_enabled && _AirDirectMode && [AirTurnCentral sharedCentral].discoveredAirTurns.count == 0) {
-        [[AirTurnCentral sharedCentral] discoverMockPeripheralModel:AirTurnDeviceTypePEDpro];
+		[[AirTurnCentral sharedCentral] discoverMockPeripheralModel:AirTurnDeviceTypePED];
+		[[AirTurnCentral sharedCentral] discoverMockPeripheralModel:AirTurnDeviceTypePEDpro];
+		[[AirTurnCentral sharedCentral] discoverMockPeripheralModel:AirTurnDeviceTypevPED];
+		[[AirTurnCentral sharedCentral] discoverMockPeripheralModel:AirTurnDeviceTypeDIGIT3];
+        [[AirTurnCentral sharedCentral] discoverMockPeripheralModel:AirTurnDeviceTypeBT200];
+		[[AirTurnCentral sharedCentral] discoverMockPeripheralModel:AirTurnDeviceTypeBT200S_2];
+		[[AirTurnCentral sharedCentral] discoverMockPeripheralModel:AirTurnDeviceTypeBT200S_4];
+		[[AirTurnCentral sharedCentral] discoverMockPeripheralModel:AirTurnDeviceTypeBT200S_6];
     }
 }
 #endif
@@ -954,15 +964,23 @@ WKScriptMessageHandler
                         UIAlertController *ac = [UIAlertController alertControllerWithTitle:AirTurnUILocalizedString(@"Update available", @"Update available alert title") message:[NSString stringWithFormat:AirTurnUILocalizedString(@"A device update is available for the connected AirTurn \"%@\". You can update your AirTurn to get the latest features and fixes in the AirTurn App", @"Update available message"), p.name] preferredStyle:UIAlertControllerStyleAlert];
                         [ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"Not now", @"Update available not now dismiss button") style:UIAlertActionStyleCancel handler:nil]];
                         UIAlertAction *goToAppAction = [UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"Go to App", @"Update available go to App dismiss button") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:AppLinkURL]];
+							if(@available(iOS 10.0, *)) {
+								[[UIApplication sharedApplication] openURL:(NSURL * _Nonnull)[NSURL URLWithString:AppLinkURL] options:@{} completionHandler:nil];
+							} else {
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_10_0
+								[[UIApplication sharedApplication] openURL:(NSURL * _Nonnull)[NSURL URLWithString:AppLinkURL]];
+#endif
+							}
                         }];
                         [ac addAction:goToAppAction];
                         [ac setPreferredAction:goToAppAction];
                         
                         [self presentAlert:ac presentGlobally:YES animated:YES];
                         
-                    }];                }
-                if(p == self.requestedConnectPeripheral) {
+                    }];
+                }
+
+				if(p == self.requestedConnectPeripheral) {
                     self.requestedConnectPeripheral = nil;
                 }
                 if(![self.discoveredDevices containsObject:p]) {
@@ -980,7 +998,13 @@ WKScriptMessageHandler
     UIAlertController *ac = [UIAlertController alertControllerWithTitle:AirTurnUILocalizedString(@"Problem connecting", @"Problem connecting error title") message:[NSString stringWithFormat:AirTurnUILocalizedString(@"There was a problem connecting to %@. This usually happens if you reset your AirTurn to delete the pairing without resetting the pairing in iOS, or have just updated the firmware. To delete the pairing, go in to iOS settings > Bluetooth > %1$@ (tap (i)) > Forget This Device, toggle Bluetooth off and on, then try connecting again in this App by tapping the alert icon next to the AirTurn and then 'Reconnect'", @"Problem connecting error message"), peripheral.name] preferredStyle:UIAlertControllerStyleAlert];
     [ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"Dismiss", @"Dismiss button title") style:UIAlertActionStyleCancel handler:nil]];
     [ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"iOS Settings", @"iOS settings alert button") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        [[UIApplication sharedApplication] openURL:(NSURL * _Nonnull)[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+		if(@available(iOS 10.0, *)) {
+			[[UIApplication sharedApplication] openURL:(NSURL * _Nonnull)[NSURL URLWithString:UIApplicationOpenSettingsURLString] options:@{} completionHandler:nil];
+		} else {
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_10_0
+			[[UIApplication sharedApplication] openURL:(NSURL * _Nonnull)[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+#endif
+		}
     }]];
     [ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"Reconnect", @"Button to initiate reconnection") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [[AirTurnCentral sharedCentral] connectToAirTurn:peripheral];
@@ -1303,13 +1327,33 @@ WKScriptMessageHandler
             switch (state) {
                 case AirTurnConnectionStateReady: {
                     NSMutableArray<UIView *> *views = [NSMutableArray arrayWithCapacity:3];
-                    if(p.chargingState != AirTurnPeripheralChargingStateDisconnectedDischarging) {
-                        UIImageView *iv = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"battery-charging"]];
+                    NSString *imageName = nil;
+                    switch (p.chargingState) {
+                        case AirTurnPeripheralChargingStateDisconnectedDischarging:
+                            if(p.batteryLevel <= AirTurnPeripheralLowBatteryLevel) {
+                                imageName = @"battery-low";
+                            }
+                            break;
+                        case AirTurnPeripheralChargingStateConnectedFault: {
+                            UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+                            [button addTarget:self action:@selector(chargingFaultButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+                            [button setImage:[UIImage imageNamed:@"battery-fault" inBundle:AirTurnUIBundle compatibleWithTraitCollection:nil] forState:UIControlStateNormal];
+                            button.tintColor = [UIColor redColor];
+                            [views addObject:button];
+                        } break;
+                        case AirTurnPeripheralChargingStateConnectedValidating:
+                            imageName = @"battery-validating";
+                            break;
+                        case AirTurnPeripheralChargingStateConnectedCharging:
+                            imageName = @"battery-charging";
+                            break;
+                        case AirTurnPeripheralChargingStateConnectedFullyCharged:
+                            imageName = @"battery-charged";
+                            break;
+                    }
+                    if(imageName) {
+                        UIImageView *iv = [[UIImageView alloc] initWithImage:[UIImage imageNamed:imageName inBundle:AirTurnUIBundle compatibleWithTraitCollection:nil]];
                         iv.tintColor = [UIColor blackColor];
-                        [views addObject:iv];
-                    } else if(p.batteryLevel <= AirTurnPeripheralLowBatteryLevel) {
-                        UIImageView *iv = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"battery-low"]];
-                        iv.tintColor = [UIColor redColor];
                         [views addObject:iv];
                     }
                     [views addObject:disclosureImageView];
@@ -1334,7 +1378,7 @@ WKScriptMessageHandler
                     if(p.lastConnectionFailed) {
                         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
                         [button addTarget:self action:@selector(deviceConnectionProblemButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
-                        [button setImage:[UIImage imageNamed:@"alert"] forState:UIControlStateNormal];
+                        [button setImage:[UIImage imageNamed:@"alert" inBundle:AirTurnUIBundle compatibleWithTraitCollection:nil] forState:UIControlStateNormal];
                         button.tintColor = [UIColor redColor];
                         [views addObject:button];
                     }
@@ -1393,42 +1437,42 @@ WKScriptMessageHandler
         case 1: {
             if(!self.discoveredDevices.count) return;
             AirTurnPeripheral *p = self.discoveredDevices[indexPath.row];
-            switch (p.state) {
-                case AirTurnConnectionStateReady:
-                    [self presentAirTurnPeripheralControllerForPeripheral:p animated:YES];
-                    break;
-                case AirTurnConnectionStateDisconnecting:
-                case AirTurnConnectionStateDisconnected:
-                case AirTurnConnectionStateSystemConnected: // might be system connected and not requested by user
-                    if([[AirTurnCentral sharedCentral].storedAirTurns containsObject:p]) {
-                        [self presentAirTurnPeripheralControllerForPeripheral:p animated:YES];
-                    } else if(self.maxNumberOfAirDirectAirTurns > 0 && [AirTurnCentral sharedCentral].storedAirTurns.count == self.maxNumberOfAirDirectAirTurns) {
-                        UIAlertController *ac = [UIAlertController alertControllerWithTitle:AirTurnUILocalizedString(@"Max number of AirTurns", @"AirTurn max number of AirTurns") message:[NSString stringWithFormat:AirTurnUILocalizedString(@"You can only connect %d AirTurn(s) at once. To connect to this AirTurn, forget another AirTurn first", @"AirTurn max number of AirTurns message"), self.maxNumberOfAirDirectAirTurns] preferredStyle:UIAlertControllerStyleAlert];
-                        [ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"OK", @"OK button title") style:UIAlertActionStyleCancel handler:nil]];
-                        [self presentAlert:ac presentGlobally:NO animated:YES];
-                    } else if(p.hasBonding) {
-                        UIAlertController *ac = [UIAlertController alertControllerWithTitle:AirTurnUILocalizedString(@"Already bonded", @"AirTurn already bonded title") message:AirTurnUILocalizedString(@"This AirTurn is already paired to another device. Reset the AirTurn by holding power for 6s until it flashes to indicate it has reset, then try again", @"AirTurn already bonded message") preferredStyle:UIAlertControllerStyleAlert];
-                        [ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"OK", @"OK button title") style:UIAlertActionStyleCancel handler:nil]];
-                        [self presentAlert:ac presentGlobally:NO animated:YES fromPeripheral:p];
-                    } else if(!self.displayedPairingWarning) {
-                        self.displayedPairingWarning = YES;
-                        UIAlertController *ac = [UIAlertController alertControllerWithTitle:AirTurnUILocalizedString(@"Pairing Required", @"AirTurn pre-connect pairing warning title") message:AirTurnUILocalizedString(@"AirTurn requires pairing to operate.  If prompted, please tap \"Pair\"", @"AirTurn pre-connect pairing warning message") preferredStyle:UIAlertControllerStyleAlert];
-                        [ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"OK", @"OK button title") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-                            self.requestedConnectPeripheral = p;
-                            [[AirTurnCentral sharedCentral] connectToAirTurn:p];
-                        }]];
-                        [self presentAlert:ac presentGlobally:NO animated:YES];
-                    } else {
-                        [[AirTurnCentral sharedCentral] connectToAirTurn:p];
-                    }
-                    [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-                    break;
-                default:
-                    if([[AirTurnCentral sharedCentral].storedAirTurns containsObject:p]) {
-                        [self presentAirTurnPeripheralControllerForPeripheral:p animated:YES];
-                    }
-                    break;
-            }
+			if([[AirTurnCentral sharedCentral].storedAirTurns containsObject:p]) {
+				[self presentAirTurnPeripheralControllerForPeripheral:p animated:YES];
+			} else {
+				switch (p.state) {
+					case AirTurnConnectionStateReady:
+						[self presentAirTurnPeripheralControllerForPeripheral:p animated:YES];
+						break;
+					case AirTurnConnectionStateDisconnecting:
+					case AirTurnConnectionStateDisconnected:
+					case AirTurnConnectionStateSystemConnected: // might be system connected and not requested by user
+						if(self.maxNumberOfAirDirectAirTurns > 0 && [AirTurnCentral sharedCentral].storedAirTurns.count == self.maxNumberOfAirDirectAirTurns) {
+							UIAlertController *ac = [UIAlertController alertControllerWithTitle:AirTurnUILocalizedString(@"Max number of AirTurns", @"AirTurn max number of AirTurns") message:[NSString stringWithFormat:AirTurnUILocalizedString(@"You can only connect %d AirTurn(s) at once. To connect to this AirTurn, forget another AirTurn first", @"AirTurn max number of AirTurns message"), self.maxNumberOfAirDirectAirTurns] preferredStyle:UIAlertControllerStyleAlert];
+							[ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"OK", @"OK button title") style:UIAlertActionStyleCancel handler:nil]];
+							[self presentAlert:ac presentGlobally:NO animated:YES];
+						} else if(p.hasBonding) {
+							UIAlertController *ac = [UIAlertController alertControllerWithTitle:AirTurnUILocalizedString(@"Already bonded", @"AirTurn already bonded title") message:AirTurnUILocalizedString(@"This AirTurn is already paired to another device. Reset the AirTurn by holding power for 6s until it flashes to indicate it has reset, then try again", @"AirTurn already bonded message") preferredStyle:UIAlertControllerStyleAlert];
+							[ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"OK", @"OK button title") style:UIAlertActionStyleCancel handler:nil]];
+							[self presentAlert:ac presentGlobally:NO animated:YES fromPeripheral:p];
+						} else if(!self.displayedPairingWarning) {
+							self.displayedPairingWarning = YES;
+							UIAlertController *ac = [UIAlertController alertControllerWithTitle:AirTurnUILocalizedString(@"Pairing Required", @"AirTurn pre-connect pairing warning title") message:AirTurnUILocalizedString(@"AirTurn requires pairing to operate.  If prompted, please tap \"Pair\"", @"AirTurn pre-connect pairing warning message") preferredStyle:UIAlertControllerStyleAlert];
+							[ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"OK", @"OK button title") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+								self.requestedConnectPeripheral = p;
+								[[AirTurnCentral sharedCentral] connectToAirTurn:p];
+							}]];
+							[self presentAlert:ac presentGlobally:NO animated:YES];
+						} else {
+							self.requestedConnectPeripheral = p;
+							[[AirTurnCentral sharedCentral] connectToAirTurn:p];
+						}
+						[self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+						break;
+					default:
+						break;
+				}
+			}
             return;
         }
         case 2:
@@ -1457,7 +1501,6 @@ WKScriptMessageHandler
         self.modeSwitchInfoViewController.view.backgroundColor = [UIColor whiteColor];
         [self.navigationController pushViewController:self.modeSwitchInfoViewController animated:YES];
         // use this vc insets as they will be the same
-        self.modeSwitchInfoWebView.scrollView.contentInset = UIEdgeInsetsMake(self.topLayoutGuide.length, 0.0, self.bottomLayoutGuide.length, 0.0);
     } else {
         self.modeSwitchInfoViewController.modalPresentationStyle = UIModalPresentationPopover;
         self.modeSwitchInfoViewController.preferredContentSize = CGSizeMake(400, 400);
@@ -1511,8 +1554,16 @@ WKScriptMessageHandler
         }
     }
     NSIndexPath *ip = [self.tableView indexPathForCell:(UITableViewCell *)c];
-    AirTurnPeripheral *p = self.discoveredDevices[ip.row];
-    [self presentConnectionProblemAlertForPeripheral:p];
+	if(ip != nil) {
+		AirTurnPeripheral *p = self.discoveredDevices[ip.row];
+		[self presentConnectionProblemAlertForPeripheral:p];
+	}
+}
+
+- (void)chargingFaultButtonTapped:(UIButton *)sender {
+    UIAlertController *ac = [UIAlertController alertControllerWithTitle:AirTurnUILocalizedString(@"Charging fault", @"Charging fault alert title") message:AirTurnUILocalizedString(@"A fault occurred while charging. Disconnect the power supply and reconnect. If the issue persists, contact AirTurn support", @"Charging fault error message") preferredStyle:UIAlertControllerStyleAlert];
+    [ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"Dismiss", @"Dismiss button title") style:UIAlertActionStyleCancel handler:nil]];
+    [self presentAlert:ac presentGlobally:NO animated:YES];
 }
 
 - (void)dismiss:(id)sender {
@@ -1525,4 +1576,5 @@ WKScriptMessageHandler
     if(!peripheralController) { return; }
     [self reloadRowForPeripheral:peripheralController.peripheral];
 }
+
 @end

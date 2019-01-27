@@ -128,7 +128,15 @@ typedef NS_ENUM(NSInteger, AirTurnPeripheralError) {
     /**
      Peripheral discovery timed out
      */
-    AirTurnPeripheralErrorDiscoveryTimedOut
+    AirTurnPeripheralErrorDiscoveryTimedOut,
+    /**
+     Peripheral feature is unsupported
+     */
+    AirTurnPeripheralErrorUnsupportedFeature,
+    /**
+     Peripheral was in an invalid state for performing this operation
+     */
+    AirTurnPeripheralErrorInvalidState,
 };
 
 /**
