@@ -92,6 +92,7 @@ typedef NS_OPTIONS(NSUInteger, AirTurnPeripheralWriteProgress) {
         [nc addObserver:self selector:@selector(peripheralWriteComplete:) name:AirTurnWriteCompleteNotification object:peripheral];
         [nc addObserver:self selector:@selector(peripheralDidUpdateName:) name:AirTurnDidUpdateNameNotification object:peripheral];
         [nc addObserver:self selector:@selector(peripheralDidUpdatePairingState:) name:AirTurnDidUpdatePairingStateNotification object:peripheral];
+		[nc addObserver:self selector:@selector(peripheralDidUpdateCurrentMode:) name:AirTurnDidUpdateCurrentModeNotification object:peripheral];
         
         self.tableView.rowHeight = UITableViewAutomaticDimension;
         
@@ -219,8 +220,10 @@ typedef NS_OPTIONS(NSUInteger, AirTurnPeripheralWriteProgress) {
         }
         
         [self.tableView reloadData];
-        
-        [self resetToDeviceValues];
+		
+		if(peripheral.state == AirTurnConnectionStateReady && self.peripheral.deviceType != AirTurnDeviceTypevPED) {
+			[self resetToDeviceValues];
+		}
     }
     return self;
 }
@@ -591,7 +594,7 @@ typedef NS_OPTIONS(NSUInteger, AirTurnPeripheralWriteProgress) {
         case SECTION_FORGET:
             return AirTurnUILocalizedString(@"Forgetting an AirTurn stops the App automatically connecting", @"Forget footer text");
         case SECTION_BUTTONS:
-            return [NSString stringWithFormat:@"F: %@  H: %@", self.peripheral.firmwareVersion, self.peripheral.hardwareVersion];
+			return [NSString stringWithFormat:@"F: %@  H: %@%@", self.peripheral.firmwareVersion, self.peripheral.hardwareVersion, self.peripheral.currentMode == AirTurnModeNone ? @"" : [NSString stringWithFormat:AirTurnUILocalizedString(@" Mode %d", @"Current mode label"), self.peripheral.currentMode]];
     }
     return nil;
 }
@@ -961,7 +964,7 @@ typedef NS_OPTIONS(NSUInteger, AirTurnPeripheralWriteProgress) {
             result = AirTurnErrorHandlingResultAlert;
         } else {
             errorTitle = AirTurnUILocalizedString(@"Unknown error!", @"Unknown error title");
-            errorMessage = [NSString stringWithFormat:AirTurnUILocalizedString(@"An unknown error occurred. If this keeps happening, try updating the App or contact support. (%@)", @"Unknown error message"), error.localizedDescription];
+            errorMessage = [NSString stringWithFormat:AirTurnUILocalizedString(@"An unknown error occurred. If this keeps happening, try updating the App or contact support. (%@)", @"Unknown error message"), error.description];
             tryAgain = NO;
             contactSupport = NO;
         }
@@ -1094,6 +1097,11 @@ typedef NS_OPTIONS(NSUInteger, AirTurnPeripheralWriteProgress) {
 - (void)peripheralDidUpdatePairingState:(NSNotification *)n {
     self.advancedSettingsController.pairingState = self.peripheral.pairingState;
     self.advancedSettingsController.numberOfPairedDevices = self.peripheral.numberOfPairedDevices;
+}
+
+- (void)peripheralDidUpdateCurrentMode:(NSNotification *)n {
+	// reload footer
+	[self.tableView reloadSections:[NSIndexSet indexSetWithIndex:[self realSectionForCodeSection:SECTION_BUTTONS]] withRowAnimation:UITableViewRowAnimationNone];
 }
 
 #pragma mark Advanced Settings Delegate

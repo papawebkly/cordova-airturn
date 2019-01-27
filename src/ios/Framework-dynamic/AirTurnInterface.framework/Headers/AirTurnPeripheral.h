@@ -101,6 +101,11 @@
 @property(nonatomic, readonly) AirTurnPeripheralFeaturesAvailable featuresAvailable;
 
 /**
+ The current mode of this AirTurn
+ */
+@property(nonatomic, readonly) AirTurnMode currentMode;
+
+/**
  The number of modes on this AirTurn
  */
 @property(nonatomic, readonly) uint8_t numberOfModes;

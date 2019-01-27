@@ -187,6 +187,11 @@ AIRTURN_EXTERN NSString * _Nonnull const AirTurnInvalidatedNotification;
 AIRTURN_EXTERN NSString * _Nonnull const AirTurnWriteCompleteNotification;
 
 /**
+ A notification indicating the current mode of the peripheral has changed. The `userInfo` dictionary contains all standard keys. The posting object is the `AirTurnPeripheral`.
+ */
+AIRTURN_EXTERN NSString * _Nonnull const AirTurnDidUpdateCurrentModeNotification;
+
+/**
  The notification `userInfo` key for the type of value just written on write complete notification. The value is an `NSNumber` object containing an integer which is one of the `AirTurnPeripheralWriteType` values.
  */
 AIRTURN_EXTERN NSString * _Nonnull const AirTurnWriteTypeKey;

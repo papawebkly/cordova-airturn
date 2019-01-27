@@ -112,7 +112,7 @@ typedef NS_ENUM(NSUInteger, AirTurnFirstResponderOwner) {
 @property(nonatomic, readonly) BOOL virtualKeyboardShouldBeShown;
 
 /**
- Determines if an external hardware keyboard (e.g. BT-105) is connected. Not valid if automatic keyboard management is disabled
+ Determines if an external hardware keyboard (e.g. BT-105) is connected. Not valid if automatic keyboard management is disabled as the keyboard must be "displayed" by iOS to monitor when the external keyboard is connected or not, and when automatic keyboard management is disabled a zero rect inputView is used on UIView to prevent keyboard display without keyboard management.
  */
 @property(nonatomic, readonly) BOOL isExternalKeyboardConnected;
 
