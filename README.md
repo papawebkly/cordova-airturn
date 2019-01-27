@@ -4,6 +4,7 @@ Cordova AirTurn
 Cordova Plugin For AirTurn Device
 
 January 2019: Upgraded to the Airturn framework 3.3.3-b.1 and switch to dynamic library
+
 Oktober 2017: Upgraded to the Airturn framework 3.1.0 Beta2 
 
 IOS
