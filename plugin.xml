@@ -20,7 +20,7 @@
       <string>An app can use an airturn to controle page navigation</string>
     </config-file>
     <config-file parent="AirTurnAutomaticKeyboardManagement" target="*-Info.plist">
-      <true />
+      <false />
     </config-file>
 
     <header-file src="src/ios/AirTurn.h" />
