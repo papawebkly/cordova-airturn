@@ -391,6 +391,9 @@ typedef NS_OPTIONS(NSUInteger, AirTurnPeripheralWriteProgress) {
 }
 
 - (void)valueChanged {
+	if(self.peripheral.state != AirTurnConnectionStateReady) {
+		return;
+	}
     _deviceValues = [self isDeviceValues];
     _defaultValues = [self isDefaultValues];
     [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:[self realSectionForCodeSection:SECTION_BUTTONS]] withRowAnimation:UITableViewRowAnimationNone];
