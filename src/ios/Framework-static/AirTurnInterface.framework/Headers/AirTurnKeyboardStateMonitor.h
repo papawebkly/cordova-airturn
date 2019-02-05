@@ -94,7 +94,7 @@ typedef NS_ENUM(NSUInteger, AirTurnFirstResponderOwner) {
 /**
  The current first responder
  */
-@property(nonatomic, readonly, weak, nullable) UIView *firstResponder;
+@property(nonatomic, readonly, weak, nullable) UIResponder *firstResponder;
 
 /**
  Determines the normal virtual keyboard state
@@ -120,12 +120,6 @@ typedef NS_ENUM(NSUInteger, AirTurnFirstResponderOwner) {
  Determines if the keyboard state monitor is reassessing the external keyboard state. If so, you can add a block to be notified of completion using
  */
 @property(nonatomic, readonly) BOOL isReassessingKeyboardState;
-
-/**
- Determines if web view is allowed to be first responder. Default `NO`
- @discussion When tapped, web views enter a strange state where they are first responder even if there is no text field active in the web view, but their `isFirstResponder` property is NO, even if there is a text field active in the web view. If this property is `YES`, webviews can become first responder and AirTurnViewManager will not automatically regain first responder.
- */
-@property(nonatomic, assign) BOOL allowWebViewFirstResponders;
 
 /**
  Determines if the singleton has been initialised
