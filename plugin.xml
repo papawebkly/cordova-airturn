@@ -83,6 +83,7 @@
     <config-file parent="/*" target="config.xml">
       <feature name="airturn">
         <param name="ios-package" value="AirTurn" />
+        <param name="onload" value="true" />
       </feature>
     </config-file>
 
