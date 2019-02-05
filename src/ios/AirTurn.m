@@ -54,17 +54,6 @@ static inline void throwWithName( NSError *error, NSString* name )
  */
 - (void)pluginInitialize
 {
-	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(finishLaunching:) name:UIApplicationDidFinishLaunchingNotification object:nil];
-
-}
-
-- (void)finishLaunching:(NSNotification *)notificationReceived
-{
-    __block id notification = [NSNotificationCenter.defaultCenter addObserverForName:AirTurnKeyboardStateMonitorReadyNotification object:nil queue:nil usingBlock:^(NSNotification * _Nonnull note) {
-		[AirTurnKeyboardStateMonitor sharedMonitor].allowWebViewFirstResponders = YES;
-		[NSNotificationCenter.defaultCenter removeObserver:notification];
-	}];
-
 }
 
 - (void)onAppTerminate
@@ -206,18 +195,8 @@ static inline void throwWithName( NSError *error, NSString* name )
 
     [AirTurnManager sharedManager];
 
-	// must allow this otherwise airturn will always make itself firstresponder.
-	[AirTurnKeyboardStateMonitor sharedMonitor].allowWebViewFirstResponders = YES;
-
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-}
 
-- (void)allowWebViewFirstResponders:(CDVInvokedUrlCommand*)command
-{
-	[AirTurnKeyboardStateMonitor sharedMonitor].allowWebViewFirstResponders = YES;
-
-	 CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 

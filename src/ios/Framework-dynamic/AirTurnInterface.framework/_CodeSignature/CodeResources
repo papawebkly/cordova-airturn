@@ -42,7 +42,7 @@
 		</data>
 		<key>Headers/AirTurnKeyboardStateMonitor.h</key>
 		<data>
-		N2whBElpfbNTzbVKm6c4RkcHdzA=
+		Sa7VDKWJRsCGO52qO6qinrB/5JY=
 		</data>
 		<key>Headers/AirTurnLogging.h</key>
 		<data>
@@ -66,7 +66,7 @@
 		</data>
 		<key>Headers/AirTurnViewManager.h</key>
 		<data>
-		YZglarXGn+r0JlYxHhV3NadhkPs=
+		Wcb8XkXXtsk7TfRJ95L1ztO97ys=
 		</data>
 		<key>Headers/EDSemver.h</key>
 		<data>
@@ -190,11 +190,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			N2whBElpfbNTzbVKm6c4RkcHdzA=
+			Sa7VDKWJRsCGO52qO6qinrB/5JY=
 			</data>
 			<key>hash2</key>
 			<data>
-			vIak5HZh8FKdaeE6E2zYRJKSemwEDQ3UhxidhAJn2OE=
+			TzyI6Hid9EHsKKt+Z0pJ61DJX6rZYY2b/Ae5cDBsCcY=
 			</data>
 		</dict>
 		<key>Headers/AirTurnLogging.h</key>
@@ -256,11 +256,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			YZglarXGn+r0JlYxHhV3NadhkPs=
+			Wcb8XkXXtsk7TfRJ95L1ztO97ys=
 			</data>
 			<key>hash2</key>
 			<data>
-			CwWsPOD9m/BXAHijWs/AMnydRphbQ2hyfsSpHVMGWQg=
+			Z5gnYLhrQsKjFdODNYrgLd85xLsONqUnG48yahQnHUU=
 			</data>
 		</dict>
 		<key>Headers/EDSemver.h</key>

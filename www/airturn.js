@@ -20,12 +20,10 @@ module.exports = {
     initAirTurn: function (success, error) {
         exec(success, error, "airturn", "initAirTurn", null);
     },
-    makeActive: function(success, error) {
+    makeActive: function (success, error) {
         exec(success, error, "airturn", "makeActive", null);
     },
-    allowWebViewFirstResponders: function (success, error) {
-        exec(success, error, "airturn", "allowWebViewFirstResponders", null);
-    },
+
     setting: function (success, error) {
         exec(success, error, "airturn", "setting", null);
     },
@@ -56,7 +54,7 @@ module.exports = {
                 me._channels[eventname] = channel.create(eventname);
                 me._channels[eventname].subscribe(f);
             }, function (err) {
-                console.log("ERROR addEventListener: " + err);
+                console.log("ERROR addEventListener: " + err)
             }, "airturn", "addEventListener", [eventname]);
         }
         else {
@@ -70,7 +68,7 @@ module.exports = {
             exec(function () {
                 me._channels[eventname].unsubscribe(f);
             }, function (err) {
-                console.log("ERROR removeEventListener: " + err);
+                console.log("ERROR removeEventListener: " + err)
             }, "airturn", "removeEventListener", [eventname]);
         }
     }

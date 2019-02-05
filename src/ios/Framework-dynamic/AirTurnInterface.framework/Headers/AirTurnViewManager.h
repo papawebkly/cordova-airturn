@@ -108,4 +108,10 @@
  */
 - (BOOL)isFirstResponder;
 
+/**
+ Determines if web view is prevented from being a first responder. Default `NO`
+ @discussion When tapped, web views enter a strange state where they are first responder even if there is no text field active in the web view, but their `isFirstResponder` property is NO, even if there *is* a text field active in the web view. By default, the framework allows this behaviour and will not revert first responder status to `AirTurnView` when a web view is first responder. If this property is `YES`, `AirTurnView` will automatically regain first responder from web views when they become first responder.
+ */
+@property(nonatomic, assign) BOOL preventWebViewFirstResponders;
+
 @end
