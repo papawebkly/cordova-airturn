@@ -58,7 +58,7 @@ static inline void throwWithName( NSError *error, NSString* name )
 
 }
 
-- (void)finishLaunching:(NSNotification *)notification
+- (void)finishLaunching:(NSNotification *)notificationReceived
 {
     __block id notification = [NSNotificationCenter.defaultCenter addObserverForName:AirTurnKeyboardStateMonitorReadyNotification object:nil queue:nil usingBlock:^(NSNotification * _Nonnull note) {
 		[AirTurnKeyboardStateMonitor sharedMonitor].allowWebViewFirstResponders = YES;
