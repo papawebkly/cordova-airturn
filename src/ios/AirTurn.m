@@ -211,6 +211,14 @@ static inline void throwWithName( NSError *error, NSString* name )
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+- (void)allowWebViewFirstResponders:(CDVInvokedUrlCommand*)command
+{
+	[AirTurnKeyboardStateMonitor sharedMonitor].allowWebViewFirstResponders = YES;
+
+	 CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
 - (void)makeActive:(CDVInvokedUrlCommand*)command
 {
     AirTurnViewManager* vManager = [[AirTurnManager sharedManager] viewManager];
