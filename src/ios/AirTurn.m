@@ -206,8 +206,10 @@ static inline void throwWithName( NSError *error, NSString* name )
 
     [AirTurnManager sharedManager];
 
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+	// must allow this otherwise airturn will always make itself firstresponder.
+	[AirTurnKeyboardStateMonitor sharedMonitor].allowWebViewFirstResponders = YES;
 
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
