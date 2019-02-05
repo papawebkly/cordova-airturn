@@ -122,6 +122,12 @@ typedef NS_ENUM(NSUInteger, AirTurnFirstResponderOwner) {
 @property(nonatomic, readonly) BOOL isReassessingKeyboardState;
 
 /**
+ Determines if web view is allowed to be first responder. Default `NO`
+ @discussion When tapped, web views enter a strange state where they are first responder even if there is no text field active in the web view, but their `isFirstResponder` property is NO, even if there is a text field active in the web view. If this property is `YES`, webviews can become first responder and AirTurnViewManager will not automatically regain first responder.
+ */
+@property(nonatomic, assign) BOOL allowWebViewFirstResponders;
+
+/**
  Determines if the singleton has been initialised
  
  @return `YES` if initialised
