@@ -78,12 +78,11 @@
     <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-validating.imageset/Contents.json" target="battery-validating" />-->
 
     <framework src="CoreBluetooth.framework" />
-    <framework src="src/ios/Framework-static/AirTurnInterface.framework" custom="true" embed="true" />
+    <framework src="src/ios/Framework-static/AirTurnInterface.framework" custom="true" />
 
     <config-file parent="/*" target="config.xml">
       <feature name="airturn">
         <param name="ios-package" value="AirTurn" />
-        <param name="onload" value="true" />
       </feature>
     </config-file>
 
