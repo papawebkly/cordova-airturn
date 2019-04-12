@@ -48,7 +48,7 @@
 /**
  A Boolean value that determines whether an AirTurn is connected
  
- This property is provided for informational purposes only and is not guaranteed to be accurate.
+ This property is only valid if automatic keyboard management is enabled as the keyboard must be "displayed" by iOS to monitor when the external keyboard is connected or not, and when automatic keyboard management is disabled a zero rect inputView is used on UIView to prevent keyboard display without keyboard management.
  */
 @property(nonatomic, readonly) BOOL connected;
 

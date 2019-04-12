@@ -123,8 +123,6 @@ WKScriptMessageHandler
 
 @property(nonatomic, strong) UIBarButtonItem *infoButton;
 
-@property(nonatomic, assign) BOOL displayedPairingWarning;
-
 @property(nonatomic, readonly) BOOL shouldPerformAirDirectTableChange;
 
 @property(nonatomic, strong) NSMutableArray<AirTurnPeripheral *> *discoveredDevices;
@@ -225,7 +223,7 @@ WKScriptMessageHandler
 
 + (void)pedalPressed:(NSNotification *)note {
     NSNumber *num = note.userInfo[AirTurnKeyCodeKey];
-    if(!num) return;
+    if(num == nil) return;
     LastPedalPressed = num.integerValue;
 }
 
@@ -1455,14 +1453,6 @@ WKScriptMessageHandler
 							UIAlertController *ac = [UIAlertController alertControllerWithTitle:AirTurnUILocalizedString(@"Already bonded", @"AirTurn already bonded title") message:AirTurnUILocalizedString(@"This AirTurn is already paired to another device. Reset the AirTurn by holding power for 6s until it flashes to indicate it has reset, then try again", @"AirTurn already bonded message") preferredStyle:UIAlertControllerStyleAlert];
 							[ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"OK", @"OK button title") style:UIAlertActionStyleCancel handler:nil]];
 							[self presentAlert:ac presentGlobally:NO animated:YES fromPeripheral:p];
-						} else if(!self.displayedPairingWarning) {
-							self.displayedPairingWarning = YES;
-							UIAlertController *ac = [UIAlertController alertControllerWithTitle:AirTurnUILocalizedString(@"Pairing Required", @"AirTurn pre-connect pairing warning title") message:AirTurnUILocalizedString(@"AirTurn requires pairing to operate.  If prompted, please tap \"Pair\"", @"AirTurn pre-connect pairing warning message") preferredStyle:UIAlertControllerStyleAlert];
-							[ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"OK", @"OK button title") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-								self.requestedConnectPeripheral = p;
-								[[AirTurnCentral sharedCentral] connectToAirTurn:p];
-							}]];
-							[self presentAlert:ac presentGlobally:NO animated:YES];
 						} else {
 							self.requestedConnectPeripheral = p;
 							[[AirTurnCentral sharedCentral] connectToAirTurn:p];
@@ -1520,7 +1510,7 @@ WKScriptMessageHandler
         NSDictionary *d = message.body;
         if(d && [d isKindOfClass:NSDictionary.class]) {
             NSNumber *height = d[@"height"];
-            if(height) {
+            if(height != nil) {
                 CGSize s = self.modeSwitchInfoViewController.preferredContentSize;
                 s.height = (CGFloat)height.doubleValue;
                 self.modeSwitchInfoViewController.preferredContentSize = s;

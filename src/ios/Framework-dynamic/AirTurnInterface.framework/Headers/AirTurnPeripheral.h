@@ -116,6 +116,11 @@
 @property(nonatomic, readonly) uint8_t numberOfDigitalPortsAvailable;
 
 /**
+ The number of analog ports available on this AirTurn
+ */
+@property(nonatomic, readonly) uint8_t numberOfAnalogPortsAvailable;
+
+/**
  The peripheral battery level, a percentage 0-100%
  */
 @property(nonatomic, readonly) uint8_t batteryLevel;
@@ -204,11 +209,27 @@
 - (BOOL)digitalPortAvailable:(AirTurnPort)port;
 
 /**
+ Indicates if a specific analog port is available
+ 
+ @param port The port
+ @return YES if the port is available
+ */
+- (BOOL)analogPortAvailable:(AirTurnPort)port;
+
+/**
  Get the port state for a given port.
  @param port The port
  @return The port state
  */
 - (AirTurnPortState)digitalPortState:(AirTurnPort)port;
+
+/**
+ Get the value for the port.
+ 
+ @param port The port
+ @return The current analog value. This value is between 0 and UINT8_MAX, and is the analog value scaled between its calibrated min and max.
+ */
+- (AirTurnPeripheralAnalogValue)analogPortValue:(AirTurnPort)port;
 
 /// ---------------------------------
 /// @name Programming

@@ -109,13 +109,13 @@ NSUInteger DebounceTimeSliderNumStops = sizeof(DebounceTimeSliderMapping) / size
 
 - (NSUInteger)codeSectionForRealSection:(NSUInteger)section {
     if(!_keyRepeatEnabled && section >= SectionKeyRepeat) {
-        return section + 1;
+        section += 1;
     }
     if(!_pairingMethodEnabled && section >= SectionPairingMethod) {
-        return section + 1;
+        section += 1;
     }
 	if(!_debounceTimeEnabled && section >= SectionDebounceTime) {
-		return section + 1;
+		section += 1;
 	}
     return section;
 }
@@ -175,7 +175,13 @@ NSUInteger DebounceTimeSliderNumStops = sizeof(DebounceTimeSliderMapping) / size
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
 	section = [self codeSectionForRealSection:section];
-    return section == SectionDeviceName || section == SectionDebounceTime ? 1 : 2;
+	switch (section) {
+		case SectionDeviceName:
+		case SectionDebounceTime:
+			return 1;
+		default:
+			return 2;
+	}
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -191,7 +197,7 @@ NSUInteger DebounceTimeSliderNumStops = sizeof(DebounceTimeSliderMapping) / size
             }
             switch (indexPath.row) {
                 case 0:
-                    c.textLabel.text = AirTurnUILocalizedString(@"PED key repeat", @"PED key repeat setting cell");
+                    c.textLabel.text = AirTurnUILocalizedString(@"AirTurn key repeat", @"AirTurn key repeat setting cell");
                     c.accessoryType = _isOSKeyRepeat ? UITableViewCellAccessoryNone : UITableViewCellAccessoryCheckmark;
                     break;
                 case 1:
@@ -295,6 +301,9 @@ NSUInteger DebounceTimeSliderNumStops = sizeof(DebounceTimeSliderMapping) / size
             c = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil];
             break;
     }
+	if(c == nil) {
+		c = [UITableViewCell new];
+	}
     return c;
 }
 
