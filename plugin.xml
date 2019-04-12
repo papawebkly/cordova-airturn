@@ -78,8 +78,7 @@
     <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-validating.imageset/Contents.json" target="battery-validating" />-->
 
     <framework src="CoreBluetooth.framework" />
-    <framework src="src/ios/Framework-dynamic/AirTurnInterface.framework" custom="true" embed="true" />
-    <!--<framework src="src/ios/Framework-static/AirTurnInterface.framework" custom="true" embed="true" />-->
+    <framework src="src/ios/Framework-static/AirTurnInterface.framework" custom="true" embed="true" />
 
     <config-file parent="/*" target="config.xml">
       <feature name="airturn">
