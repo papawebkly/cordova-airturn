@@ -982,13 +982,13 @@ typedef NS_OPTIONS(NSUInteger, AirTurnPeripheralWriteProgress) {
         if(tryAgain) {
             errorMessage = [errorMessage stringByAppendingString:AirTurnUILocalizedString(@". Try again", @"Try again error message suffix")];
         } else if(toggleBluetooth) {
-            errorMessage = [errorMessage stringByAppendingString:@". Try toggling Bluetooth off and on, either from control centre (swipe up from the bottom of your screen) or iOS settings"];
+            errorMessage = [errorMessage stringByAppendingString:AirTurnUILocalizedString(@". Try toggling Bluetooth off and on, either from control centre (swipe up from the bottom of your screen) or iOS settings", @"Toggle bluetooth suggestion message")];
         }
         if(contactSupport) {
             errorMessage = [errorMessage stringByAppendingString:AirTurnUILocalizedString(@". If the problem continues to occur, contact AirTurn support", @"Contact support error message suffix")];
         }
         if(underlyingError) {
-            errorMessage = [errorMessage stringByAppendingFormat:AirTurnUILocalizedString(@" (Underlying error: %@", @"Underlying error message suffix"), underlyingError];
+            errorMessage = [errorMessage stringByAppendingFormat:AirTurnUILocalizedString(@" (Underlying error: %@)", @"Underlying error message suffix"), underlyingError];
         }
         ac = [UIAlertController alertControllerWithTitle:errorTitle message:errorMessage preferredStyle:UIAlertControllerStyleAlert];
         [ac addAction:[UIAlertAction actionWithTitle:AirTurnUILocalizedString(@"Dismiss", @"Error dismiss button") style:UIAlertActionStyleCancel handler:dismissHandler]];
@@ -1103,6 +1103,7 @@ typedef NS_OPTIONS(NSUInteger, AirTurnPeripheralWriteProgress) {
 }
 
 - (void)peripheralDidUpdateCurrentMode:(NSNotification *)n {
+	if(_peripheral.state != AirTurnConnectionStateReady) { return; }
 	// reload footer
 	[self.tableView reloadSections:[NSIndexSet indexSetWithIndex:[self realSectionForCodeSection:SECTION_BUTTONS]] withRowAnimation:UITableViewRowAnimationNone];
 }

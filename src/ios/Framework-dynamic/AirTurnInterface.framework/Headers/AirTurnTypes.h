@@ -89,6 +89,15 @@ AIRTURN_EXTERN NSString * _Nonnull const AirTurnKeyCodeKey;
 AIRTURN_EXTERN NSString * _Nonnull const AirTurnPedalRepeatCount;
 
 /// ---------------------------------
+/// @name Analog port Notifications
+/// ---------------------------------
+
+/**
+ A notification indicating the analog port value changed. The `userInfo` dictionary contains all standard keys and the key `AirTurnPortNumberKey` contains the port that has changed.
+ */
+AIRTURN_EXTERN NSString * _Nonnull const AirTurnAnalogPortValueChangeNotification;
+
+/// ---------------------------------
 /// @name BTLE Central State Notifications
 /// ---------------------------------
 
@@ -132,11 +141,11 @@ AIRTURN_EXTERN NSString * _Nonnull const AirTurnLostNotification;
 AIRTURN_EXTERN NSString * _Nonnull const AirTurnConnectingNotification;
 
 /**
- A notification indicating the connection state changed. The `userInfo` dictionary contains all standard keys and the key `AirTurnConnectionStateKey` contains the new connection state
+ A notification indicating the connection state changed. The `userInfo` dictionary contains all standard keys and the key `AirTurnConnectionStateKey` contains the new connection state. Works with AirDirect and Keyboard. Only sent in Keyboard mode if automatic keyboard management is enabled, see `AirTurnViewManager.connected` for more info.
  */
 AIRTURN_EXTERN NSString * _Nonnull const AirTurnConnectionStateChangedNotification;
 /**
- A notification indicating an AirTurn device connected. The `userInfo` dictionary contains all standard keys and the key `AirTurnConnectionStateKey` contains the new connection state
+ A notification indicating an AirTurn device connected. The `userInfo` dictionary contains all standard keys and the key `AirTurnConnectionStateKey` contains the new connection state. Works with AirDirect and Keyboard. Only sent in Keyboard mode if automatic keyboard management is enabled, see `AirTurnViewManager.connected` for more info.
  */
 AIRTURN_EXTERN NSString * _Nonnull const AirTurnDidConnectNotification;
 /**
@@ -144,7 +153,7 @@ AIRTURN_EXTERN NSString * _Nonnull const AirTurnDidConnectNotification;
  */
 AIRTURN_EXTERN NSString * _Nonnull const AirTurnDidFailToConnectNotification;
 /**
- A notification indicating an AirTurn device disconnected. The `userInfo` dictionary contains all standard keys and the key `AirTurnConnectionStateKey` contains the new connection state
+ A notification indicating an AirTurn device disconnected. The `userInfo` dictionary contains all standard keys and the key `AirTurnConnectionStateKey` contains the new connection state. Works with AirDirect and Keyboard. Only sent in Keyboard mode if automatic keyboard management is enabled, see `AirTurnViewManager.connected` for more info.
  */
 AIRTURN_EXTERN NSString * _Nonnull const AirTurnDidDisconnectNotification;
 
@@ -513,6 +522,10 @@ typedef NS_OPTIONS(uint16_t, AirTurnModeFeatures) {
      */
     AirTurnModeFeaturesDigitalPortConfig = 1 << 0,
     /**
+     Analog port config is available for this mode
+     */
+    AirTurnModeFeaturesAnalogPortConfig = 1 << 1,
+    /**
      Proprietary output is available for this mode
      */
     AirTurnModeFeaturesProprietary = 1 << 2,
@@ -629,6 +642,10 @@ typedef NS_OPTIONS(NSUInteger, AirTurnPeripheralFeaturesAvailable){
      */
     AirTurnPeripheralFeaturesAvailablePortConfig = 1 << 2,
     /**
+     Indicates analog is available
+     */
+    AirTurnPeripheralFeaturesAvailableAnalog = 1 << 3,
+    /**
      Indicates pairing method configuration is available
      */
     AirTurnPeripheralFeaturesAvailablePairingMethod = 1 << 4,
@@ -712,6 +729,20 @@ typedef NS_ENUM(uint8_t, AirTurnPeripheralPairingMethod) {
  A type for debounce time durations
  */
 typedef uint16_t AirTurnPeripheralDebounceTime;
+
+/**
+ A type for analog values
+ */
+typedef int16_t AirTurnPeripheralAnalogValue;
+
+/**
+ The maximum possible analog value
+ */
+extern const AirTurnPeripheralAnalogValue AirTurnPeripheralAnalogValueMax;
+/**
+ The minimum possible analog value
+ */
+extern const AirTurnPeripheralAnalogValue AirTurnPeripheralAnalogValueMin;
 
 /**
  Defines the max delay before repeat in seconds

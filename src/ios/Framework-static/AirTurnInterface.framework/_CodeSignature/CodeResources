@@ -54,11 +54,11 @@
 		</data>
 		<key>Headers/AirTurnPeripheral.h</key>
 		<data>
-		BbuocPSaKZ+2YE2qDejCUD8xyso=
+		VgbBgue8BF6jrgEoWmwRmQfxsEg=
 		</data>
 		<key>Headers/AirTurnTypes.h</key>
 		<data>
-		LRB7BWLDot7zMYITGHv2X9m9B6A=
+		xpYW4/82AI4Y8iOOFRJkZutGrWo=
 		</data>
 		<key>Headers/AirTurnView.h</key>
 		<data>
@@ -66,7 +66,7 @@
 		</data>
 		<key>Headers/AirTurnViewManager.h</key>
 		<data>
-		Wcb8XkXXtsk7TfRJ95L1ztO97ys=
+		IKnSs8uR7RsELBm3x3GhlZ3/jsQ=
 		</data>
 		<key>Headers/EDSemver.h</key>
 		<data>
@@ -74,7 +74,7 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		bHfNGGRLQJ6h5DAQxRna+NSX1Jk=
+		qc/L2DXdSoAESvQqC5YVu9JfWTg=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -215,22 +215,22 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			BbuocPSaKZ+2YE2qDejCUD8xyso=
+			VgbBgue8BF6jrgEoWmwRmQfxsEg=
 			</data>
 			<key>hash2</key>
 			<data>
-			asb3feQHh/CtpMkND5QJOKCER4hD1YQMjAYU+pGyadk=
+			5Ip526NNpWYZQ2bqt8bD4Q518twVnOfKLAaZLXoc2GQ=
 			</data>
 		</dict>
 		<key>Headers/AirTurnTypes.h</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			LRB7BWLDot7zMYITGHv2X9m9B6A=
+			xpYW4/82AI4Y8iOOFRJkZutGrWo=
 			</data>
 			<key>hash2</key>
 			<data>
-			FVh54mJDmWIsDeuXzxJSw4/DKtNC6TVhvoW3OnaHUb4=
+			TotZfOUxWcG7q+nxrC9aOzWL0IKefd7L+2jC5LObLgc=
 			</data>
 		</dict>
 		<key>Headers/AirTurnView.h</key>
@@ -248,11 +248,11 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			Wcb8XkXXtsk7TfRJ95L1ztO97ys=
+			IKnSs8uR7RsELBm3x3GhlZ3/jsQ=
 			</data>
 			<key>hash2</key>
 			<data>
-			Z5gnYLhrQsKjFdODNYrgLd85xLsONqUnG48yahQnHUU=
+			mPn/i0kmOMhVHttfMTWSXUeeEc5j2LLzNfw+wNTubXA=
 			</data>
 		</dict>
 		<key>Headers/EDSemver.h</key>
