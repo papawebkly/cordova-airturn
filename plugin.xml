@@ -17,8 +17,12 @@
   <platform name="ios">
 
     <config-file parent="NSBluetoothPeripheralUsageDescription" target="*-Info.plist">
-      <string>An app can use an airturn to controle page navigation</string>
+      <string>An app can use an bluetooth to pedal controle page navigation</string>
     </config-file>
+    <config-file parent="NSBluetoothAlwaysUsageDescription" target="*-Info.plist">
+      <string>The app can use a bluetooth pedal to controle page navigation</string>
+    </config-file>
+
     <config-file parent="AirTurnAutomaticKeyboardManagement" target="*-Info.plist">
       <false />
     </config-file>
