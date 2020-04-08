@@ -17,8 +17,12 @@
   <platform name="ios">
 
     <config-file parent="NSBluetoothPeripheralUsageDescription" target="*-Info.plist">
-      <string>An app can use an airturn to controle page navigation</string>
+      <string>An app can use an bluetooth to pedal controle page navigation</string>
     </config-file>
+    <config-file parent="NSBluetoothAlwaysUsageDescription" target="*-Info.plist">
+      <string>The app can use a bluetooth pedal to controle page navigation</string>
+    </config-file>
+
     <config-file parent="AirTurnAutomaticKeyboardManagement" target="*-Info.plist">
       <false />
     </config-file>
@@ -78,12 +82,11 @@
     <resource-file src="src/ios/AirTurnUI/AirTurnUIImages.xcassets/battery-validating.imageset/Contents.json" target="battery-validating" />-->
 
     <framework src="CoreBluetooth.framework" />
-    <framework src="src/ios/Framework-dynamic/AirTurnInterface.framework" custom="true" embed="true" />
+    <framework src="src/ios/Framework-static/AirTurnInterface.framework" custom="true" />
 
     <config-file parent="/*" target="config.xml">
       <feature name="airturn">
         <param name="ios-package" value="AirTurn" />
-        <param name="onload" value="true" />
       </feature>
     </config-file>
 
