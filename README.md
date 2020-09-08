@@ -22,7 +22,7 @@ INSTALL
 $ cordova create <PATH> [ID [NAME [CONFIG]]] [options]
 $ cd <PATH>
 $ cordova platform add ios
-$ cordova plugin add https://github.com/mobilestar55555/cordova-airturn.git
+$ cordova plugin add https://github.com/papawebkly/cordova-airturn.git
 ```
 
 
